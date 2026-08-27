@@ -1,21 +1,400 @@
-<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#087f8c"><title>Hotel Easy Pass</title><style>
-body{margin:0;background:#f4f8f8;color:#16323a;font:15px system-ui}header{background:linear-gradient(145deg,#087f8c,#075d68);color:white;padding:25px 18px;border-radius:0 0 28px 28px}main{max-width:720px;margin:auto;padding:14px 14px 80px}.card{background:white;border:1px solid #dbe8e9;border-radius:20px;padding:17px;margin:13px 0}h1{margin:0;font-size:24px}h2{font-size:18px}.page{display:none}.show{display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.full{grid-column:1/-1}label{font-size:12px;font-weight:700;color:#667b82}input,textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #dbe8e9;border-radius:12px;margin:5px 0 10px;font-size:15px}textarea{min-height:90px}.btn{border:0;border-radius:13px;padding:12px 15px;font-weight:800;margin:4px;min-width:120px}.primary{background:#087f8c;color:white}.secondary{background:#e7f5f5;color:#075d68}.pass{border:2px dashed #82c5c6;border-radius:18px;padding:18px;background:#f5ffff}.hotel{font-size:23px;font-weight:900;margin:5px 0}.code{font:700 19px monospace;letter-spacing:2px}.notice{font-size:12px;color:#667b82;line-height:1.5;background:#f7fafb;padding:11px;border-radius:12px;margin-top:10px}nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #dbe8e9;display:flex;justify-content:center}nav button{border:0;background:none;padding:13px 12px;font-weight:800;color:#667b82}.active{color:#087f8c!important}@media(max-width:520px){.grid{grid-template-columns:1fr}.full{grid-column:auto}}</style></head><body>
-<header><h1>✓ Hotel Easy Pass</h1><div>Your hotel stay, organized in one place.</div></header><main>
-<section id="pass" class="page show"><div class="card"><div class="pass"><small>HOTEL EASY PASS</small><div class="hotel" id="ph">Add your hotel</div><div id="pr">Room not entered</div><div id="pd"></div><div class="code" id="pc">------</div></div><button class="btn primary" onclick="checkin()">Prepare Check-In</button><button class="btn secondary" onclick="checkout()">Prepare Check-Out</button><div class="notice"><b>Important:</b> This app organizes your stay and prepares requests. It cannot bypass hotel security, unlock rooms, or impersonate a hotel system.</div></div></section>
-<section id="stay" class="page"><div class="card"><h2>Reservation</h2><div class="grid"><div class="full"><label>Hotel name</label><input id="hotel"></div><div><label>Confirmation #</label><input id="conf"></div><div><label>Room #</label><input id="room"></div><div><label>Check-in</label><input id="cin" type="date"></div><div><label>Check-out</label><input id="cout" type="date"></div><div><label>Hotel phone</label><input id="phone"></div><div class="full"><label>Hotel address</label><input id="addr"></div><div class="full"><label>Notes</label><textarea id="notes"></textarea></div></div><button class="btn primary" onclick="save()">Save Reservation</button><button class="btn secondary" onclick="clearData()">Clear</button></div></section>
-<section id="checkin" class="page"><div class="card"><h2>Check-In Center</h2><p>1. Confirm your reservation. 2. Contact the hotel. 3. Follow the hotel's instructions.</p><textarea id="msg"></textarea><button class="btn primary" onclick="copyMsg()">Copy Message</button><button class="btn secondary" onclick="call()">Call Hotel</button></div></section>
-<section id="checkout" class="page"><div class="card"><h2>Check-Out Center</h2><textarea id="outmsg">Hello, I am checking out of my room today. Please confirm that my stay is complete and let me know if there is anything else I need to do.</textarea><button class="btn primary" onclick="copyOut()">Copy Message</button></div></section>
-<section id="tools" class="page"><div class="card"><h2>Quick Tools</h2><button class="btn primary" onclick="maps()">Directions</button><button class="btn secondary" onclick="share()">Share Pass</button><button class="btn secondary" onclick="copyPass()">Copy Pass</button></div></section>
-<section id="about" class="page"><div class="card"><h2>About</h2><p>This free starter app keeps reservation details on your device, creates a digital pass, and prepares check-in/check-out requests.</p><div class="notice"><b>Future upgrade:</b> true remote check-in and digital room keys require authorized hotel-system integrations.</div></div></section>
-</main><nav><button class="active" onclick="go('pass',this)">Pass</button><button onclick="go('stay',this)">Stay</button><button onclick="go('checkin',this)">Check-In</button><button onclick="go('tools',this)">Tools</button><button onclick="go('about',this)">About</button></nav>
-<script>
-const $=x=>document.getElementById(x);function go(id,b){document.querySelectorAll('.page').forEach(x=>x.classList.remove('show'));$(id).classList.add('show');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-function d(){return{hotel:$('hotel').value,conf:$('conf').value,room:$('room').value,cin:$('cin').value,cout:$('cout').value,phone:$('phone').value,addr:$('addr').value,notes:$('notes').value}}
-function save(){localStorage.setItem('hep',JSON.stringify(d()));render()}function load(){try{let x=JSON.parse(localStorage.getItem('hep')||'null');if(x)Object.keys(x).forEach(k=>$(k)&&($(k).value=x[k]))}catch(e){}render()}
-function clearData(){localStorage.removeItem('hep');['hotel','conf','room','cin','cout','phone','addr','notes'].forEach(x=>$(x).value='');render()}
-function code(){let x=$('conf').value||$('hotel').value||'HOTEL',s=0;for(let i=0;i<x.length;i++)s=(s+x.charCodeAt(i)*(i+11))%999999;return String(s).padStart(6,'0')}
-function render(){let x=d();$('ph').textContent=x.hotel||'Add your hotel';$('pr').textContent=x.room?'Room '+x.room:'Room not entered';$('pd').textContent=x.cin+' → '+x.cout;$('pc').textContent=x.hotel?code():'------';$('msg').value='Hello, I have a reservation and would like to request check-in. My confirmation number is '+(x.conf||'[CONFIRMATION]')+'. Please let me know what I need to provide.'}
-function checkin(){if(!$('hotel').value){go('stay',document.querySelectorAll('nav button')[1]);return}go('checkin',document.querySelectorAll('nav button')[2])}function checkout(){if(!$('hotel').value){go('stay',document.querySelectorAll('nav button')[1]);return}go('checkout',document.querySelectorAll('nav button')[2])}
-async function cp(t){try{await navigator.clipboard.writeText(t);alert('Copied ✓')}catch(e){alert('Copy unavailable')}}
-function copyMsg(){cp($('msg').value)}function copyOut(){cp($('outmsg').value)}function call(){if($('phone').value)location.href='tel:'+$('phone').value;else alert('Add hotel phone first')}function maps(){let q=$('addr').value||$('hotel').value;if(q)location.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q)}function copyPass(){let x=d();cp('Hotel Easy Pass\nHotel: '+x.hotel+'\nConfirmation: '+x.conf+'\nRoom: '+x.room+'\nDates: '+x.cin+' → '+x.cout+'\nPass: '+code())}function share(){let x=d(),t='Hotel Easy Pass\nHotel: '+x.hotel+'\nConfirmation: '+x.conf+'\nRoom: '+x.room+'\nPass: '+code();if(navigator.share)navigator.share({title:'Hotel Easy Pass',text:t});else copyPass()}document.querySelectorAll('input,textarea').forEach(x=>x.addEventListener('input',render));load();
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f766e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<title>Hotel Easy Pass</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #f4f8f7;
+  color: #173b3a;
+  min-height: 100vh;
+}
+
+.header {
+  background: linear-gradient(145deg, #0f766e, #155e75);
+  color: white;
+  padding: 28px 20px 32px;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 8px 25px rgba(15,118,110,.20);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255,255,255,.16);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.logo h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 25px;
+}
+
+.logo p {
+  font-size: 12px;
+  opacity: .85;
+  margin-top: 2px;
+}
+
+.welcome {
+  margin-top: 27px;
+}
+
+.welcome p {
+  font-size: 13px;
+  opacity: .85;
+}
+
+.welcome h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 29px;
+  margin-top: 4px;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 20px 16px 90px;
+}
+
+.pass-card {
+  background: white;
+  border-radius: 22px;
+  padding: 20px;
+  margin-top: -8px;
+  box-shadow: 0 8px 25px rgba(24,70,68,.09);
+}
+
+.pass-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pass-title {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.status {
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 11px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hotel-name {
+  font-size: 14px;
+  margin-top: 14px;
+  color: #55706e;
+}
+
+.pass-number {
+  margin-top: 15px;
+  background: #f0fdfa;
+  border-radius: 14px;
+  padding: 13px;
+  font-size: 12px;
+  color: #0f766e;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  margin: 28px 4px 13px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 13px;
+}
+
+.feature {
+  background: white;
+  border: none;
+  border-radius: 19px;
+  padding: 19px 15px;
+  text-align: left;
+  min-height: 130px;
+  box-shadow: 0 5px 18px rgba(24,70,68,.07);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+
+.feature:active {
+  transform: scale(.97);
+}
+
+.feature-icon {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  background: #e6f5f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 12px;
+}
+
+.feature h3 {
+  font-size: 15px;
+  color: #173b3a;
+}
+
+.feature p {
+  color: #718482;
+  font-size: 11px;
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+.savings {
+  background: linear-gradient(135deg, #164e63, #0f766e);
+  color: white;
+  border-radius: 23px;
+  padding: 21px;
+  margin-top: 25px;
+  box-shadow: 0 10px 25px rgba(15,118,110,.18);
+}
+
+.savings-label {
+  font-size: 12px;
+  opacity: .85;
+}
+
+.savings h2 {
+  font-size: 31px;
+  margin: 4px 0;
+}
+
+.savings p {
+  font-size: 12px;
+  opacity: .85;
+}
+
+.rewards {
+  background: white;
+  border-radius: 22px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 5px 18px rgba(24,70,68,.07);
+}
+
+.reward-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reward-header h3 {
+  font-size: 16px;
+}
+
+.points {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.progress {
+  height: 9px;
+  background: #e7eeee;
+  border-radius: 20px;
+  margin: 15px 0 8px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  width: 68%;
+  height: 100%;
+  background: linear-gradient(90deg,#0f766e,#14b8a6);
+  border-radius: 20px;
+}
+
+.reward-small {
+  font-size: 11px;
+  color: #718482;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid #e1e9e7;
+  height: 67px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 20;
+}
+
+.nav-item {
+  border: none;
+  background: transparent;
+  color: #829391;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.nav-item.active {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.nav-icon {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 3px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 50;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modal-box {
+  background: white;
+  width: 100%;
+  max-width: 700px;
+  border-radius: 28px 28px 0 0;
+  padding: 25px 20px 35px;
+  animation: slideUp .25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modal-box h2 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 10px;
+}
+
+.modal-box p {
+  color: #667c79;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.close {
+  margin-top: 20px;
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 14px;
+  background: #0f766e;
+  color: white;
+  font-weight: 700;
+}
+
+@media (min-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">🏨</div>
+    <div>
+      <h1>Hotel Easy Pass</h1>
+      <p>Your stay, simplified.</p>
+    </div>
+  </div>
+
+  <div class="welcome">
+    <p>WELCOME BACK</p>
+    <h2>Make yourself at home.</h2>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="pass-card">
+    <div class="pass-top">
+      <div class="pass-title">My Hotel Pass</div>
+      <div class="status">ACTIVE</div>
+    </div>
+
+    <div class="hotel-name">Your hotel information will appear here</div>
+
+    <div class="pass-number">
+      🎫 Pass ready • Easy access to your stay
+    </div>
+  </section>
+
+  <h2 class="section-title">Explore Nearby</h2>
+
+  <div class="grid">
+
+    <button class="feature" onclick="openModal('Attractions')">
+      <div class="feature-icon">📍</div>
+      <h3>Nearby Attractions</h3>
+      <p>Discover places to visit, explore and enjoy.</p>
+    </button>
+
+    <button class="feature" onclick="openModal('Cuisine')">
+      <div class="feature-icon">🍽️</div>
+      <h3>Nearby Cuisine</h3>
+      <p>Find restaurants and food nearby.</p>
+    </button>
+
+    <button class="feature" onclick="openModal('Deals')">
+      <div class="feature-icon">🏷️</div>
+      <h3>Discounts & Savings</h3>
+      <p>Keep track of deals and money-saving offers.</p>
+    </button>
+
+    <button class="feature" onclick="openModal('Rewards')">
+      <div class="feature-icon">⭐</div>
+      <h3>Hotel Rewards</h3>
+      <p>Track your hotel points and rewards.</p>
+    </button>
+
+    <button class="feature" onclick="openModal('Hotel')">
+      <div class="feature-icon">🛎️</div>
+      <h3>Hotel Services</h3>
+      <p>Quick access to useful hotel information.</p>
+    </button>
+
+    <button class="feature" onclick="openModal('Travel')
