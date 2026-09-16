@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Hotel Easy Pass</title>
+
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="Hotel Easy Pass helps travelers find nearby attractions, food, deals, savings, and track hotel rewards.">
+
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f8f7;
+      color: #173b3a;
+    }
+
+    #app {
+      min-height: 100vh;
+    }
+
+    .hep-app {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .hep-header {
+      background: #0f766e;
+      color: white;
+      padding: 28px 20px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .hep-header h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+
+    .hep-header p {
+      margin: 0;
+      opacity: 0.95;
+    }
+
+    .hep-card {
+      background: white;
+      padding: 20px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .hep-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .hep-grid button,
+    .hep-card button,
+    .hep-button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      border: 0;
+      border-radius: 14px;
+      background: #115e59;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .hep-grid button:hover,
+    .hep-card button:hover,
+    .hep-button:hover {
+      background: #0f766e;
+    }
+
+    label {
+      display: block;
+      margin: 14px 0;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      margin-top: 7px;
+      border: 1px solid #b7cfcd;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .hep-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main id="app">
+    Loading Hotel Easy Pass...
+  </main>
+
+  <script src="main.js"></script>
+
+</body>
+</html>
