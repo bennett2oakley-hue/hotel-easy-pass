@@ -3,163 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#087f8c">
-  <meta name="description" content="Hotel Easy Pass - your simple travel companion for hotels, attractions, savings and rewards.">
+
+  <meta name="theme-color" content="#087f78">
+  <meta name="description" content="Hotel Easy Pass - your pocket travel companion for hotels, attractions, savings, rewards and travel tools.">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
   <title>Hotel Easy Pass</title>
 
-  <link rel="manifest" href="manifest.json">
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f8f9;
-      color: #17343a;
-      line-height: 1.5;
-    }
-
-    header {
-      background: linear-gradient(135deg, #087f8c, #0aa6a6);
-      color: white;
-      padding: 28px 20px;
-      text-align: center;
-      border-radius: 0 0 25px 25px;
-    }
-
-    header h1 {
-      font-size: 30px;
-      margin-bottom: 6px;
-    }
-
-    header p {
-      opacity: .95;
-      font-size: 15px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 18px;
-    }
-
-    .welcome {
-      background: white;
-      border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 18px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.08);
-    }
-
-    .welcome h2 {
-      color: #087f8c;
-      margin-bottom: 8px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 18px;
-      padding: 20px 14px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,.07);
-      cursor: pointer;
-      transition: transform .2s, box-shadow .2s;
-    }
-
-    .card:active {
-      transform: scale(.97);
-    }
-
-    .icon {
-      font-size: 34px;
-      margin-bottom: 8px;
-    }
-
-    .card h3 {
-      color: #087f8c;
-      font-size: 17px;
-      margin-bottom: 5px;
-    }
-
-    .card p {
-      font-size: 13px;
-      color: #65777b;
-    }
-
-    .section {
-      display: none;
-      background: white;
-      margin-top: 18px;
-      padding: 20px;
-      border-radius: 18px;
-      box-shadow: 0 4px 15px rgba(0,0,0,.08);
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    .section h2 {
-      color: #087f8c;
-      margin-bottom: 12px;
-    }
-
-    .button {
-      display: inline-block;
-      border: none;
-      background: #087f8c;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 12px;
-      margin-top: 12px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .input {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #ccd9dc;
-      border-radius: 10px;
-      margin-top: 8px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    .reward-box {
-      background: #e9f8f8;
-      padding: 16px;
-      border-radius: 14px;
-      margin-top: 12px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 25px 15px;
-      color: #718285;
-      font-size: 13px;
-    }
-
-    .back {
-      background: #e7eff0;
-      color: #17343a;
-      margin-right: 8px;
-    }
-  </style>
+  <link rel="manifest" href="./manifest.webmanifest">
 </head>
 
 <body>
 
-<header>
-  <h1>🏨 Hotel Easy Pass</h1>
-  <p>Your simple travel
+  <noscript>
+    <div style="
+      padding:30px;
+      text-align:center;
+      font-family:Arial,sans-serif;
+    ">
+      Please enable JavaScript to use Hotel Easy Pass.
+    </div>
+  </noscript>
+
+  <main id="app">
+    <div style="
+      padding:40px;
+      text-align:center;
+      font-family:Arial,sans-serif;
+    ">
+      Loading Hotel Easy Pass...
+    </div>
+  </main>
+
+  <script src="./main.js" defer></script>
+
+</body>
+</html>
