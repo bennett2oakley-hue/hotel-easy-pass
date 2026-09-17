@@ -1,11 +1,11 @@
 {
   "name": "Hotel Easy Pass",
   "short_name": "Hotel Easy Pass",
-  "description": "Your simple travel companion for hotels, attractions, savings and rewards.",
+  "description": "Your pocket travel companion for hotels, attractions, savings and rewards.",
   "start_url": "./",
   "display": "standalone",
-  "background_color": "#f4f8f9",
-  "theme_color": "#087f8c",
+  "background_color": "#eef8f7",
+  "theme_color": "#087f78",
   "orientation": "portrait",
   "icons": []
 }
