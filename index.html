@@ -3,123 +3,163 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <meta name="theme-color" content="#087f8c">
+  <meta name="description" content="Hotel Easy Pass - your simple travel companion for hotels, attractions, savings and rewards.">
   <title>Hotel Easy Pass</title>
-
-  <meta name="theme-color" content="#0f766e">
-  <meta name="description" content="Hotel Easy Pass helps travelers find nearby attractions, food, deals, savings, and track hotel rewards.">
 
   <link rel="manifest" href="manifest.json">
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f1f8f7;
-      color: #173b3a;
+      background: #f4f8f9;
+      color: #17343a;
+      line-height: 1.5;
     }
 
-    #app {
-      min-height: 100vh;
-    }
-
-    .hep-app {
-      max-width: 700px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    .hep-header {
-      background: #0f766e;
+    header {
+      background: linear-gradient(135deg, #087f8c, #0aa6a6);
       color: white;
       padding: 28px 20px;
-      border-radius: 20px;
       text-align: center;
-      margin-bottom: 20px;
+      border-radius: 0 0 25px 25px;
     }
 
-    .hep-header h1 {
-      margin: 0 0 8px;
+    header h1 {
       font-size: 30px;
+      margin-bottom: 6px;
     }
 
-    .hep-header p {
-      margin: 0;
-      opacity: 0.95;
+    header p {
+      opacity: .95;
+      font-size: 15px;
     }
 
-    .hep-card {
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .welcome {
       background: white;
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
+    }
+
+    .welcome h2 {
+      color: #087f8c;
+      margin-bottom: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 20px 14px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,.07);
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .card:active {
+      transform: scale(.97);
+    }
+
+    .icon {
+      font-size: 34px;
+      margin-bottom: 8px;
+    }
+
+    .card h3 {
+      color: #087f8c;
+      font-size: 17px;
+      margin-bottom: 5px;
+    }
+
+    .card p {
+      font-size: 13px;
+      color: #65777b;
+    }
+
+    .section {
+      display: none;
+      background: white;
+      margin-top: 18px;
       padding: 20px;
       border-radius: 18px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 15px rgba(0,0,0,.08);
     }
 
-    .hep-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 20px;
-    }
-
-    .hep-grid button,
-    .hep-card button,
-    .hep-button {
+    .section.active {
       display: block;
-      width: 100%;
-      padding: 16px;
-      border: 0;
-      border-radius: 14px;
-      background: #115e59;
+    }
+
+    .section h2 {
+      color: #087f8c;
+      margin-bottom: 12px;
+    }
+
+    .button {
+      display: inline-block;
+      border: none;
+      background: #087f8c;
       color: white;
-      font-size: 16px;
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-top: 12px;
       font-weight: bold;
-      text-decoration: none;
-      text-align: center;
       cursor: pointer;
     }
 
-    .hep-grid button:hover,
-    .hep-card button:hover,
-    .hep-button:hover {
-      background: #0f766e;
-    }
-
-    label {
-      display: block;
-      margin: 14px 0;
-      font-weight: bold;
-    }
-
-    input {
+    .input {
       width: 100%;
       padding: 13px;
-      margin-top: 7px;
-      border: 1px solid #b7cfcd;
+      border: 1px solid #ccd9dc;
       border-radius: 10px;
+      margin-top: 8px;
+      margin-bottom: 10px;
       font-size: 16px;
     }
 
-    @media (max-width: 480px) {
-      .hep-grid {
-        grid-template-columns: 1fr;
-      }
+    .reward-box {
+      background: #e9f8f8;
+      padding: 16px;
+      border-radius: 14px;
+      margin-top: 12px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px 15px;
+      color: #718285;
+      font-size: 13px;
+    }
+
+    .back {
+      background: #e7eff0;
+      color: #17343a;
+      margin-right: 8px;
     }
   </style>
 </head>
 
 <body>
 
-  <main id="app">
-    Loading Hotel Easy Pass...
-  </main>
-
-  <script src="main.js"></script>
-
-</body>
-</html>
+<header>
+  <h1>🏨 Hotel Easy Pass</h1>
+  <p>Your simple travel
