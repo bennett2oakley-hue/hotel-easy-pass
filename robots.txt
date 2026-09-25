@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bennett2oakley-hue.github.io/hotel-easy-pass/sitemap.xml
