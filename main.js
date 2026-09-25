@@ -67,6 +67,7 @@ function render() {
         <button onclick="scrollToId('myTrip')">🧭 My Trip</button>
         <button onclick="scrollToId('owners')">🏨 Owners</button>
         <button onclick="scrollToId('hotel-branding')">🎨 Hotel Branding</button>
+        <button onclick="scrollToId('emergency')">🆘 Emergency</button>
         <button onclick="scrollToId('explore')">📍 Explore</button>
         <button onclick="scrollToId('money')">💰 Money</button>
         <button onclick="scrollToId('tools')">🧳 Tools</button>
@@ -159,6 +160,18 @@ function render() {
           <div><strong>🔗 Direct booking</strong><span>Future booking and campaign links</span></div>
         </div>
         <div class="specials-note"><strong>Built with room to grow:</strong> the current app keeps the traveler experience separate from future hotel branding, so individual properties can be added without redesigning the whole platform.</div>
+      </section>
+
+      <section class="card emergency-card" id="emergency">
+        <div class="section-head"><div><span class="kicker">WHEN PLANS GO SIDEWAYS</span><h2>🆘 Emergency Travel</h2></div><span class="partner-badge">HELP FAST</span></div>
+        <p>Life happens. Hotel Easy Pass keeps the important information close so you can focus on getting help instead of figuring out what to do next.</p>
+        <div class="emergency-grid">
+          <a class="emergency-action" href="tel:911" onclick="trackEvent('emergency_911')"><strong>📞 Call 911</strong><span>Emergency services</span></a>
+          <button class="emergency-action" onclick="openEmergencyDirections()"><strong>🏥 Find medical help</strong><span>Search nearby urgent care and hospitals</span></button>
+          <button class="emergency-action" onclick="shareEmergencyInfo()"><strong>📤 Share my trip info</strong><span>Share saved hotel details with someone you trust</span></button>
+          <button class="emergency-action" onclick="scrollToId('hotel');trackEvent('emergency_hotel_info')"><strong>🏨 Show my hotel</strong><span>Quick access to your saved stay</span></button>
+        </div>
+        <div class="emergency-note"><strong>Important:</strong> For an immediate emergency, call 911. Hotel Easy Pass is a travel organization tool, not a substitute for emergency services or professional medical care.</div>
       </section>
 
       <section class="card owner-card" id="owners">
@@ -358,6 +371,30 @@ function loadOwnerDraft() {
   });
   const status = document.getElementById("ownerDraftStatus");
   if (status) status.textContent = "✓ Saved owner draft loaded.";
+}
+
+
+function openEmergencyDirections() {
+  const q = encodeURIComponent("urgent care hospital emergency room");
+  window.open("https://www.google.com/maps/search/?api=1&query=" + q, "_blank", "noopener");
+  trackEvent("emergency_medical_search");
+}
+
+async function shareEmergencyInfo() {
+  const stay = state.hotel || {};
+  const text = [
+    "Hotel Easy Pass emergency travel info",
+    stay.name ? "Hotel: " + stay.name : "",
+    stay.room ? "Room: " + stay.room : "",
+    stay.address ? "Address: " + stay.address : "",
+    stay.checkIn ? "Check-in: " + stay.checkIn : "",
+    "I may need help. Please contact me directly if you can."
+  ].filter(Boolean).join("\n");
+  try {
+    if (navigator.share) await navigator.share({title:"Emergency Travel Info", text});
+    else { await navigator.clipboard.writeText(text); alert("Emergency travel information copied. You can paste it into a text message."); }
+    trackEvent("emergency_share_info");
+  } catch (e) {}
 }
 
 
@@ -631,7 +668,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}
 .hero{background:linear-gradient(135deg,#087f78,#12a89d);color:white;padding:28px 20px;display:flex;align-items:center;gap:15px;box-shadow:0 5px 20px rgba(0,0,0,.12)}
 .logo{font-size:48px}.eyebrow,.kicker{font-size:11px;letter-spacing:2px;font-weight:800}.eyebrow{opacity:.85}
 h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.92}.hero-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.hero-pills span{font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 8px;border-radius:99px}
-.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(7,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(8,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .nav button{border:0;background:transparent;padding:9px 3px;color:#245b5a;font-weight:700}
 .welcome{padding:25px 20px 12px;display:flex;gap:15px;justify-content:space-between;align-items:center}
 .welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.welcome .primary{box-shadow:0 6px 16px rgba(8,127,120,.18)}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
@@ -647,7 +684,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.brand-ready-card{border:1px solid #cfe8e3;background:linear-gradient(180deg,#fff,#f7fbff)}.brand-roadmap{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.brand-roadmap div{padding:12px;border:1px solid #dcebea;border-radius:12px;background:#fff}.brand-roadmap strong,.brand-roadmap span{display:block}.brand-roadmap strong{font-size:13px}.brand-roadmap span{font-size:11px;color:#60706f;margin-top:4px}.owner-card{border:1px solid #cfe8e3;background:linear-gradient(180deg,#fff,#f4fbfa)}.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}.owner-card textarea{margin-top:0}.owner-status{margin-top:10px;color:#087f78;font-size:13px;font-weight:700}.owner-benefits{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.owner-benefits span,.owner-benefits strong{padding:9px;border-radius:10px;background:#edf8f6;font-size:11px}.owner-benefits strong{grid-column:1/-1;color:#087f78}.specials-card{border:1px solid #f0dfbf;background:linear-gradient(180deg,#fff,#fffaf1)}.specials-list{display:grid;gap:9px;margin-top:12px}.special-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid #eadfca;border-radius:14px;background:#fff}.special-icon{font-size:25px}.special-item strong{display:block;margin-top:3px}.special-item p{margin:4px 0 0;font-size:13px;color:#557070}.special-tag{font-size:9px;font-weight:900;letter-spacing:1px;color:#8a5a12;background:#fff0cf;padding:4px 6px;border-radius:7px}.specials-note{margin-top:12px;padding:11px;border-radius:11px;background:#fff4dc;font-size:11px;color:#6f5a37}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.emergency-card{border:1px solid #f0d8d8;background:linear-gradient(180deg,#fff,#fff8f8)}.emergency-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}.emergency-action{display:flex;flex-direction:column;gap:4px;padding:15px;border:1px solid #eadede;border-radius:14px;background:#fff;text-align:left;text-decoration:none;cursor:pointer;font:inherit}.emergency-action strong{font-size:14px}.emergency-action span{font-size:11px;color:#667}.emergency-note{padding:12px;border-radius:12px;background:#fff0f0;font-size:11px;color:#654}.emergency-note strong{font-weight:800}.brand-ready-card{border:1px solid #cfe8e3;background:linear-gradient(180deg,#fff,#f7fbff)}.brand-roadmap{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.brand-roadmap div{padding:12px;border:1px solid #dcebea;border-radius:12px;background:#fff}.brand-roadmap strong,.brand-roadmap span{display:block}.brand-roadmap strong{font-size:13px}.brand-roadmap span{font-size:11px;color:#60706f;margin-top:4px}.owner-card{border:1px solid #cfe8e3;background:linear-gradient(180deg,#fff,#f4fbfa)}.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}.owner-card textarea{margin-top:0}.owner-status{margin-top:10px;color:#087f78;font-size:13px;font-weight:700}.owner-benefits{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.owner-benefits span,.owner-benefits strong{padding:9px;border-radius:10px;background:#edf8f6;font-size:11px}.owner-benefits strong{grid-column:1/-1;color:#087f78}.specials-card{border:1px solid #f0dfbf;background:linear-gradient(180deg,#fff,#fffaf1)}.specials-list{display:grid;gap:9px;margin-top:12px}.special-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid #eadfca;border-radius:14px;background:#fff}.special-icon{font-size:25px}.special-item strong{display:block;margin-top:3px}.special-item p{margin:4px 0 0;font-size:13px;color:#557070}.special-tag{font-size:9px;font-weight:900;letter-spacing:1px;color:#8a5a12;background:#fff0cf;padding:4px 6px;border-radius:7px}.specials-note{margin-top:12px;padding:11px;border-radius:11px;background:#fff4dc;font-size:11px;color:#6f5a37}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
