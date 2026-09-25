@@ -122,6 +122,18 @@ function render() {
         </div>
       </section>
 
+      <section class="card revenue-card">
+        <div class="section-head"><div><span class="kicker">BOOK & SAVE</span><h2>✈️ Travel Marketplace</h2></div><span class="partner-badge">PARTNER READY</span></div>
+        <p>Compare hotels, activities and travel services. Partner links can be connected here so Hotel Easy Pass can earn when users book.</p>
+        <div class="market-grid">
+          <a class="market-item" href="https://www.booking.com/" target="_blank" rel="noopener noreferrer"><strong>🏨 Hotels</strong><small>Find a stay</small></a>
+          <a class="market-item" href="https://www.viator.com/" target="_blank" rel="noopener noreferrer"><strong>🎟️ Experiences</strong><small>Things to do</small></a>
+          <a class="market-item" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
+          <a class="market-item" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
+        </div>
+        <div class="affiliate-note">When partner links are monetized, commissions may help support the app. Prices are set by the partner.</div>
+      </section>
+
       <section class="card" id="money">
         <div class="section-head"><div><span class="kicker">SAVE & TRACK</span><h2>💰 Trip Budget</h2></div></div>
         <div class="budget-grid">
@@ -383,7 +395,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}..budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
