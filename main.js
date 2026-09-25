@@ -291,7 +291,7 @@ async function installApp() {
   trackEvent("install_prompt");
 }
 
-function shareTrip() {
+async function shareTrip() {
   const h = state.hotel;
   const text = [h.name && `Hotel: ${h.name}`, h.room && `Room: ${h.room}`, h.address && `Address: ${h.address}`, h.checkIn && `Check-in: ${new Date(h.checkIn).toLocaleString()}`, h.checkOut && `Check-out: ${new Date(h.checkOut).toLocaleString()}`].filter(Boolean).join("\n");
   if (!text) return alert("Save your hotel stay first.");
@@ -438,7 +438,7 @@ function renderPacking() {
     <button class="delete" onclick="deletePacking(${index})">×</button></div>`).join("");
 }
 
-async function shareApp() {
+async async function shareApp() {
   const shareData = { title: APP_NAME, text: "Try Hotel Easy Pass, a pocket travel command center.", url: location.href };
   if (navigator.share) { try { await navigator.share(shareData); } catch (_) {} }
   else if (navigator.clipboard) { await navigator.clipboard.writeText(location.href); alert("App link copied. You can paste it into a text or Messenger."); }
@@ -481,7 +481,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .check{display:block;padding:10px 0;border-bottom:1px solid #edf0f0}.check input{width:auto;margin-right:8px}.check.done{text-decoration:line-through;opacity:.55}
 .packing-row{display:flex;gap:8px;align-items:center}.packing-row .check{flex:1}.packing-row .delete{margin-bottom:1px}
 .essential-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency{border:1px solid #f0d7d7}.call911{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:12px;background:#f7e2e2;color:#8b2d2d;font-weight:900;text-decoration:none}
-.popular-searches{margin-top:14px;padding-top:12px;border-top:1px solid #e7eeee}.popular-searches strong{font-size:13px}footer a{color:#087f78;font-weight:700;text-decoration:none}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
+.popular-searches{margin-top:14px;padding-top:12px;border-top:1px solid #e7eeee}.popular-searches strong{font-size:13px}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
 @media(max-width:520px){.welcome{align-items:flex-start;flex-direction:column}.welcome .primary{width:100%}.form.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.search-row{flex-direction:column}.button-row{flex-direction:column}}
 @media(max-width:380px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
