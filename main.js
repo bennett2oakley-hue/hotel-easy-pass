@@ -1,4 +1,5 @@
 const APP_NAME = "Hotel Easy Pass";
+let deferredInstallPrompt = null;
 
 const state = {
   hotel: JSON.parse(localStorage.getItem("hep_hotel") || "null") || { name: "", address: "", checkIn: "", checkOut: "", room: "" },
@@ -73,7 +74,7 @@ function render() {
           <h2>Everything you need for a smoother hotel stay.</h2>
           <p>Keep your stay details, nearby essentials, rewards, notes, budget and travel checklists together on your phone.</p>
         </div>
-        <button class="primary" onclick="shareApp()">↗ Share</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" onclick="shareApp()">↗ Share</button><button id="installAppBtn" class="secondary" style="display:none" onclick="installApp()">📲 Install App</button></div>
       </section>
 
       <section class="onboarding" id="welcomePanel">
@@ -135,10 +136,10 @@ function render() {
         <div class="section-head"><div><span class="kicker">BOOK & SAVE</span><h2>✈️ Travel Marketplace</h2></div><span class="partner-badge">PARTNER READY</span></div>
         <p>Compare hotels, activities and travel services. Partner links can be connected here so Hotel Easy Pass can earn when users book.</p>
         <div class="market-grid">
-          <a class="market-item" href="https://www.booking.com/" target="_blank" rel="noopener noreferrer"><strong>🏨 Hotels</strong><small>Find a stay</small></a>
-          <a class="market-item" href="https://www.viator.com/" target="_blank" rel="noopener noreferrer"><strong>🎟️ Experiences</strong><small>Things to do</small></a>
-          <a class="market-item" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
-          <a class="market-item" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
+          <a class="market-item" data-partner="booking" href="https://www.booking.com/" target="_blank" rel="noopener noreferrer"><strong>🏨 Hotels</strong><small>Find a stay</small></a>
+          <a class="market-item" data-partner="viator" href="https://www.viator.com/" target="_blank" rel="noopener noreferrer"><strong>🎟️ Experiences</strong><small>Things to do</small></a>
+          <a class="market-item" data-partner="skyscanner" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
+          <a class="market-item" data-partner="resortpass" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
         </div>
         <div class="affiliate-note">When partner links are monetized, commissions may help support the app. Prices are set by the partner.</div>
       </section>
@@ -265,7 +266,31 @@ function renderCountdown() {
   if (!existing && text) box.insertAdjacentHTML("beforeend", text);
 }
 
-async function shareTrip() {
+async function trackEvent(name, details = {}) {
+  const events = JSON.parse(localStorage.getItem("hep_events") || "[]");
+  events.push({ name, details, at: new Date().toISOString() });
+  localStorage.setItem("hep_events", JSON.stringify(events.slice(-100)));
+}
+
+function showInstallButton() {
+  const existing = document.getElementById("installAppBtn");
+  if (existing) existing.style.display = "block";
+}
+
+async function installApp() {
+  if (!deferredInstallPrompt) {
+    alert("If Install App is not offered, open your browser menu and choose Add to Home screen.");
+    return;
+  }
+  deferredInstallPrompt.prompt();
+  try { await deferredInstallPrompt.userChoice; } catch (_) {}
+  deferredInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+  trackEvent("install_prompt");
+}
+
+function shareTrip() {
   const h = state.hotel;
   const text = [h.name && `Hotel: ${h.name}`, h.room && `Room: ${h.room}`, h.address && `Address: ${h.address}`, h.checkIn && `Check-in: ${new Date(h.checkIn).toLocaleString()}`, h.checkOut && `Check-out: ${new Date(h.checkOut).toLocaleString()}`].filter(Boolean).join("\n");
   if (!text) return alert("Save your hotel stay first.");
@@ -283,6 +308,8 @@ function saveHotel() {
   };
   persist();
   renderStaySummary();
+  renderCountdown();
+  trackEvent("save_stay");
 }
 
 function clearHotel() {
@@ -312,9 +339,10 @@ function renderStaySummary() {
   `;
 }
 
-function quickSearch(term) { maps(term + " near me"); }
+function quickSearch(term) { trackEvent("nearby_search", { term }); maps(term + " near me"); }
 
 function searchDeals() {
+  trackEvent("deal_search");
   const value = document.getElementById("dealSearch").value.trim();
   maps(value ? value + " near me" : "deals near me");
 }
@@ -442,7 +470,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}..revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}..budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
@@ -450,7 +478,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .check{display:block;padding:10px 0;border-bottom:1px solid #edf0f0}.check input{width:auto;margin-right:8px}.check.done{text-decoration:line-through;opacity:.55}
 .packing-row{display:flex;gap:8px;align-items:center}.packing-row .check{flex:1}.packing-row .delete{margin-bottom:1px}
 .essential-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency{border:1px solid #f0d7d7}.call911{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:12px;background:#f7e2e2;color:#8b2d2d;font-weight:900;text-decoration:none}
-footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
+footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
 @media(max-width:520px){.welcome{align-items:flex-start;flex-direction:column}.welcome .primary{width:100%}.form.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.search-row{flex-direction:column}.button-row{flex-direction:column}}
 @media(max-width:380px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
@@ -458,3 +486,20 @@ document.head.appendChild(style);
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
 render();
+
+
+window.addEventListener("beforeinstallprompt", event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  showInstallButton();
+});
+window.addEventListener("appinstalled", () => {
+  deferredInstallPrompt = null;
+  const btn = document.getElementById("installAppBtn");
+  if (btn) btn.style.display = "none";
+  trackEvent("app_installed");
+});
+document.addEventListener("click", event => {
+  const link = event.target.closest?.("[data-partner]");
+  if (link) trackEvent("marketplace_click", { partner: link.dataset.partner });
+});
