@@ -222,7 +222,7 @@ function render() {
       <footer>
         <strong>Hotel Easy Pass</strong>
         <p>Travel easier. Save smarter. Keep the trip together.</p>
-        <small>Information stays on this device unless you choose to open or share something.</small>
+        <small>Information stays on this device unless you choose to open or share something.</small><div style="margin-top:12px"><a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a> · <a href="./MONETIZATION.md">Partner & revenue notes</a></div>
       </footer>
     </div>
   `;
@@ -478,7 +478,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .check{display:block;padding:10px 0;border-bottom:1px solid #edf0f0}.check input{width:auto;margin-right:8px}.check.done{text-decoration:line-through;opacity:.55}
 .packing-row{display:flex;gap:8px;align-items:center}.packing-row .check{flex:1}.packing-row .delete{margin-bottom:1px}
 .essential-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency{border:1px solid #f0d7d7}.call911{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:12px;background:#f7e2e2;color:#8b2d2d;font-weight:900;text-decoration:none}
-footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
+footer a{color:#087f78;font-weight:700;text-decoration:none}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
 @media(max-width:520px){.welcome{align-items:flex-start;flex-direction:column}.welcome .primary{width:100%}.form.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.search-row{flex-direction:column}.button-row{flex-direction:column}}
 @media(max-width:380px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
