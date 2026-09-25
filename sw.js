@@ -1,5 +1,5 @@
-const CACHE_NAME = "hotel-easy-pass-v3";
-const FILES_TO_CACHE = ["./", "./index.html", "./main.js", "./manifest.webmanifest"];
+const CACHE_NAME = "hotel-easy-pass-v4";
+const FILES_TO_CACHE = ["./", "./index.html", "./main.js", "./manifest.webmanifest", "./traveler.html", "./owner.html"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE)));
