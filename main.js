@@ -29,7 +29,7 @@ function persist() {
   localStorage.setItem("hep_packing", JSON.stringify(state.packing));
 }
 
-function maps(search) {
+function maps(search) { trackEvent("maps_search", { query: search });
   window.open("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(search), "_blank");
 }
 
@@ -347,7 +347,7 @@ function searchDeals() {
   maps(value ? value + " near me" : "deals near me");
 }
 
-function addReward() {
+function addReward() { trackEvent("reward_added");
   const name = document.getElementById("rewardName").value.trim();
   if (!name) return;
   state.rewards.push({ name, points: document.getElementById("rewardPoints").value || "0" });
@@ -367,7 +367,7 @@ function renderRewards() {
     <button class="delete" onclick="deleteReward(${index})">Delete</button></div>`).join("");
 }
 
-function addNote() {
+function addNote() { trackEvent("note_added");
   const text = document.getElementById("noteText").value.trim();
   if (!text) return;
   state.notes.unshift({ text, date: new Date().toLocaleDateString() });
@@ -386,7 +386,7 @@ function renderNotes() {
     <button class="delete" onclick="deleteNote(${index})">Delete</button></div>`).join("");
 }
 
-function calculateBudget() {
+function calculateBudget() { trackEvent("budget_calculated");
   const fields = ["hotelCost","foodCost","gasCost","funCost","otherCost"];
   const total = fields.reduce((sum, id) => sum + (Number(document.getElementById(id).value) || 0), 0);
   const limit = Number(document.getElementById("budgetLimit").value) || 0;
@@ -396,7 +396,7 @@ function calculateBudget() {
     : `<strong>Estimated trip total: ${money(total)}</strong>`;
 }
 
-function calculateTip() {
+function calculateTip() { trackEvent("tip_calculated");
   const bill = Number(document.getElementById("tipBill").value) || 0;
   const percent = Number(document.getElementById("tipPercent").value) || 0;
   const people = Math.max(1, Number(document.getElementById("tipPeople").value) || 1);
@@ -416,7 +416,7 @@ function renderChecklist() {
 
 function resetChecklist() { state.checklist = defaultChecklist.map(text => ({ text, done: false })); persist(); renderChecklist(); }
 
-function addPacking() {
+function addPacking() { trackEvent("packing_item_added");
   const input = document.getElementById("packingItem");
   const text = input.value.trim();
   if (!text) return;
