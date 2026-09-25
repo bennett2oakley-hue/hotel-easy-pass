@@ -119,7 +119,7 @@ function render() {
 
       <section class="card">
         <div class="section-head"><div><span class="kicker">DISCOVER</span><h2>🔎 Nearby Finder</h2></div></div>
-        <p>Search for a place, service, restaurant, attraction or deal and open the results in Maps.</p>
+        <p>Search for a place, service, restaurant, attraction or deal and open the results in Maps.</p><div class="popular-searches"><strong>Popular right now</strong><div class="chips"><button onclick="quickSearch('best cheap restaurants')">🍔 Cheap restaurants</button><button onclick="quickSearch('free things to do')">🎟️ Free things to do</button><button onclick="quickSearch('grocery store')">🛒 Groceries</button><button onclick="quickSearch('gas station')">⛽ Gas</button></div></div>
         <div class="search-row">
           <input id="dealSearch" placeholder="Try: pizza, museum, discounts, grocery...">
           <button class="primary" onclick="searchDeals()">Search</button>
@@ -141,7 +141,7 @@ function render() {
           <a class="market-item" data-partner="skyscanner" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
           <a class="market-item" data-partner="resortpass" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
         </div>
-        <div class="affiliate-note">When partner links are monetized, commissions may help support the app. Prices are set by the partner.</div>
+        <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
       </section>
 
       <section class="card" id="money">
@@ -478,7 +478,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .check{display:block;padding:10px 0;border-bottom:1px solid #edf0f0}.check input{width:auto;margin-right:8px}.check.done{text-decoration:line-through;opacity:.55}
 .packing-row{display:flex;gap:8px;align-items:center}.packing-row .check{flex:1}.packing-row .delete{margin-bottom:1px}
 .essential-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency{border:1px solid #f0d7d7}.call911{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:12px;background:#f7e2e2;color:#8b2d2d;font-weight:900;text-decoration:none}
-footer a{color:#087f78;font-weight:700;text-decoration:none}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
+.popular-searches{margin-top:14px;padding-top:12px;border-top:1px solid #e7eeee}.popular-searches strong{font-size:13px}footer a{color:#087f78;font-weight:700;text-decoration:none}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
 @media(max-width:520px){.welcome{align-items:flex-start;flex-direction:column}.welcome .primary{width:100%}.form.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.search-row{flex-direction:column}.button-row{flex-direction:column}}
 @media(max-width:380px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
