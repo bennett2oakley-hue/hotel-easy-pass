@@ -147,6 +147,13 @@ function render() {
         <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
       </section>
 
+      <section class="card specials-card" id="specials">
+        <div class="section-head"><div><span class="kicker">HOTEL SPECIALS</span><h2>🔥 Special for Specials</h2></div><span class="partner-badge">PROMO READY</span></div>
+        <p>Hotels can showcase limited-time discounts, free upgrades, packages and other guest promotions right where travelers are planning their stay.</p>
+        <div id="specialsList" class="specials-list"></div>
+        <div class="specials-note"><strong>For hotel owners & operators:</strong> Want your promotion featured? Add your offer details through the partner program when this marketplace is connected to live hotel partners.</div>
+      </section>
+
       <section class="card trip-command" id="command">
         <div class="section-head"><div><span class="kicker">YOUR TRIP, AT A GLANCE</span><h2>🧭 Trip Command Center</h2></div></div>
         <div class="command-grid">
@@ -156,6 +163,7 @@ function render() {
           <div><strong>4</strong><span>Share the plan</span></div>
         </div>
         <button class="wide primary" onclick="scrollToId('explore');trackEvent('command_cta')">📍 Explore near me</button>
+        <button class="wide secondary" onclick="scrollToId('specials');trackEvent('specials_cta')">🔥 See hotel specials</button>
       </section>
 
       <section class="card my-trip" id="myTrip">
@@ -259,6 +267,7 @@ function render() {
   renderStaySummary();
   renderCountdown();
   renderMyTrip();
+  renderSpecials();
   updateWelcome();
   renderRewards();
   renderNotes();
@@ -276,6 +285,22 @@ function dismissWelcome() {
 function updateWelcome() {
   const panel = document.getElementById("welcomePanel");
   if (panel) panel.style.display = localStorage.getItem("hep_welcomed") === "1" ? "none" : "flex";
+}
+
+function renderSpecials() {
+  const box = document.getElementById("specialsList");
+  if (!box) return;
+  const specials = [
+    { title: "Last-Minute Stay", text: "Fill open rooms with a limited-time guest offer.", icon: "🏨", tag: "LIMITED TIME" },
+    { title: "Free Upgrade", text: "Promote room upgrades, late checkout or other perks.", icon: "✨", tag: "GUEST PERK" },
+    { title: "Stay + Experience", text: "Bundle a room with an attraction, meal or local experience.", icon: "🎟️", tag: "PACKAGE" }
+  ];
+  box.innerHTML = specials.map(item => `
+    <div class="special-item">
+      <div class="special-icon">${item.icon}</div>
+      <div><span class="special-tag">${item.tag}</span><strong>${item.title}</strong><p>${item.text}</p></div>
+    </div>
+  `).join("");
 }
 
 function getTripStatus() {
@@ -548,7 +573,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.specials-card{border:1px solid #f0dfbf;background:linear-gradient(180deg,#fff,#fffaf1)}.specials-list{display:grid;gap:9px;margin-top:12px}.special-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid #eadfca;border-radius:14px;background:#fff}.special-icon{font-size:25px}.special-item strong{display:block;margin-top:3px}.special-item p{margin:4px 0 0;font-size:13px;color:#557070}.special-tag{font-size:9px;font-weight:900;letter-spacing:1px;color:#8a5a12;background:#fff0cf;padding:4px 6px;border-radius:7px}.specials-note{margin-top:12px;padding:11px;border-radius:11px;background:#fff4dc;font-size:11px;color:#6f5a37}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
