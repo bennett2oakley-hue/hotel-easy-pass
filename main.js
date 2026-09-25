@@ -75,7 +75,7 @@ function render() {
           <h2>Everything you need for a smoother hotel stay.</h2>
           <p>Keep your stay details, nearby essentials, rewards, notes, budget and travel checklists together on your phone.</p>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" onclick="shareApp()">↗ Share</button><button id="installAppBtn" class="secondary" style="display:none" onclick="installApp()">📲 Install App</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" onclick="scrollToId('stay')">🏨 Start My Stay</button><button class="secondary" onclick="shareApp()">↗ Share</button><button id="installAppBtn" class="secondary" style="display:none" onclick="installApp()">📲 Install App</button></div>
       </section>
 
       <section class="onboarding" id="welcomePanel">
@@ -142,7 +142,19 @@ function render() {
           <a class="market-item" data-partner="skyscanner" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
           <a class="market-item" data-partner="resortpass" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
         </div>
+        <button class="wide primary" onclick="scrollToId('stay');trackEvent('marketplace_cta')">🏨 Have a hotel? Build your stay dashboard</button>
         <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
+      </section>
+
+      <section class="card trip-command" id="command">
+        <div class="section-head"><div><span class="kicker">YOUR TRIP, AT A GLANCE</span><h2>🧭 Trip Command Center</h2></div></div>
+        <div class="command-grid">
+          <div><strong>1</strong><span>Save your hotel</span></div>
+          <div><strong>2</strong><span>Find nearby essentials</span></div>
+          <div><strong>3</strong><span>Track your budget</span></div>
+          <div><strong>4</strong><span>Share the plan</span></div>
+        </div>
+        <button class="wide primary" onclick="scrollToId('explore');trackEvent('command_cta')">📍 Explore near me</button>
       </section>
 
       <section class="card" id="money">
@@ -439,6 +451,7 @@ function renderPacking() {
 }
 
 async function shareApp() {
+  trackEvent("share_app");
   const shareData = { title: APP_NAME, text: "Try Hotel Easy Pass, a pocket travel command center.", url: location.href };
   if (navigator.share) { try { await navigator.share(shareData); } catch (_) {} }
   else if (navigator.clipboard) { await navigator.clipboard.writeText(location.href); alert("App link copied. You can paste it into a text or Messenger."); }
@@ -460,7 +473,7 @@ h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.92}.hero-pills{display:
 .nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .nav button{border:0;background:transparent;padding:9px 3px;color:#245b5a;font-weight:700}
 .welcome{padding:25px 20px 12px;display:flex;gap:15px;justify-content:space-between;align-items:center}
-.welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
+.welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.welcome .primary{box-shadow:0 6px 16px rgba(8,127,120,.18)}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
 .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 15px}
 .quick-grid button,.essential-grid button{border:0;transition:transform .15s ease,box-shadow .15s ease;border-radius:15px;background:white;padding:14px 8px;color:#173b3b;box-shadow:0 3px 12px rgba(0,0,0,.08)}
 .quick-grid button{font-size:25px}.quick-grid button:active,.market-item:active,.chips button:active{transform:scale(.98)}.quick-grid span{display:block;font-size:12px;margin-top:5px}
@@ -473,7 +486,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
