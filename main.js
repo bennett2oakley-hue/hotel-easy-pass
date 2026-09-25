@@ -64,6 +64,7 @@ function render() {
 
       <nav class="nav" aria-label="Main navigation">
         <button onclick="scrollToId('stay')">🏨 Stay</button>
+        <button onclick="scrollToId('myTrip')">🧭 My Trip</button>
         <button onclick="scrollToId('explore')">📍 Explore</button>
         <button onclick="scrollToId('money')">💰 Money</button>
         <button onclick="scrollToId('tools')">🧳 Tools</button>
@@ -531,7 +532,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}
 .hero{background:linear-gradient(135deg,#087f78,#12a89d);color:white;padding:28px 20px;display:flex;align-items:center;gap:15px;box-shadow:0 5px 20px rgba(0,0,0,.12)}
 .logo{font-size:48px}.eyebrow,.kicker{font-size:11px;letter-spacing:2px;font-weight:800}.eyebrow{opacity:.85}
 h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.92}.hero-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.hero-pills span{font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 8px;border-radius:99px}
-.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .nav button{border:0;background:transparent;padding:9px 3px;color:#245b5a;font-weight:700}
 .welcome{padding:25px 20px 12px;display:flex;gap:15px;justify-content:space-between;align-items:center}
 .welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.welcome .primary{box-shadow:0 6px 16px rgba(8,127,120,.18)}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
