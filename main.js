@@ -76,6 +76,15 @@ function render() {
         <button class="primary" onclick="shareApp()">↗ Share</button>
       </section>
 
+      <section class="onboarding" id="welcomePanel">
+        <div>
+          <span class="badge">FREE TRAVEL TOOLKIT</span>
+          <h2>Plan it. Save it. Find it. Share it.</h2>
+          <p>Hotel Easy Pass puts the useful stuff travelers need most in one fast, phone-friendly place.</p>
+        </div>
+        <button class="primary" onclick="dismissWelcome()">Get Started</button>
+      </section>
+
       <section class="card stay-card" id="stay">
         <div class="section-head">
           <div><span class="kicker">YOUR STAY</span><h2>🏨 Hotel Dashboard</h2></div>
@@ -90,7 +99,7 @@ function render() {
         <input id="hotelAddress" value="${esc(state.hotel.address)}" placeholder="Hotel address">
         <div class="button-row">
           <button class="primary" onclick="saveHotel()">Save Stay</button>
-          <button class="secondary" onclick="openHotelMap()">📍 Directions</button>
+          <button class="secondary" onclick="openHotelMap()">📍 Directions</button><button class="secondary" onclick="shareTrip()">↗ Share Trip</button>
         </div>
         <div id="staySummary" class="stay-summary"></div>
       </section>
@@ -218,6 +227,8 @@ function render() {
   `;
 
   renderStaySummary();
+  renderCountdown();
+  updateWelcome();
   renderRewards();
   renderNotes();
   renderChecklist();
@@ -225,6 +236,42 @@ function render() {
 }
 
 function scrollToId(id) { document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }); }
+
+function dismissWelcome() {
+  localStorage.setItem("hep_welcomed", "1");
+  updateWelcome();
+}
+
+function updateWelcome() {
+  const panel = document.getElementById("welcomePanel");
+  if (panel) panel.style.display = localStorage.getItem("hep_welcomed") === "1" ? "none" : "flex";
+}
+
+function renderCountdown() {
+  const box = document.getElementById("staySummary");
+  if (!box) return;
+  const h = state.hotel;
+  if (!h.checkIn) return;
+  const diff = new Date(h.checkIn).getTime() - Date.now();
+  let text = "";
+  if (diff > 0) {
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    text = `<div class="countdown">⏱️ Check-in in <strong>${days ? days + "d " : ""}${hours}h</strong></div>`;
+  } else if (h.checkOut && new Date(h.checkOut).getTime() > Date.now()) {
+    text = '<div class="countdown">🏨 You are currently in your saved stay.</div>';
+  }
+  const existing = box.querySelector(".countdown");
+  if (!existing && text) box.insertAdjacentHTML("beforeend", text);
+}
+
+async function shareTrip() {
+  const h = state.hotel;
+  const text = [h.name && `Hotel: ${h.name}`, h.room && `Room: ${h.room}`, h.address && `Address: ${h.address}`, h.checkIn && `Check-in: ${new Date(h.checkIn).toLocaleString()}`, h.checkOut && `Check-out: ${new Date(h.checkOut).toLocaleString()}`].filter(Boolean).join("\n");
+  if (!text) return alert("Save your hotel stay first.");
+  if (navigator.share) { try { await navigator.share({title: APP_NAME + " Trip", text}); } catch (_) {} }
+  else if (navigator.clipboard) { await navigator.clipboard.writeText(text); alert("Trip details copied. Paste them into Messenger or text."); }
+}
 
 function saveHotel() {
   state.hotel = {
@@ -395,7 +442,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}..budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}..revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}..budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
