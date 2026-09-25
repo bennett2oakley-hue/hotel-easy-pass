@@ -157,6 +157,21 @@ function render() {
         <button class="wide primary" onclick="scrollToId('explore');trackEvent('command_cta')">📍 Explore near me</button>
       </section>
 
+      <section class="card my-trip" id="myTrip">
+        <div class="section-head"><div><span class="kicker">YOUR LIVE TRIP</span><h2>🧭 My Trip</h2></div><span id="tripStatusBadge" class="partner-badge">READY</span></div>
+        <div id="myTripSummary" class="my-trip-summary"></div>
+        <div class="trip-actions">
+          <button class="primary" onclick="openHotelMap()">📍 Open Hotel</button>
+          <button class="secondary" onclick="shareTrip()">↗ Share Trip</button>
+        </div>
+        <div class="trip-stats">
+          <div><strong id="tripBudgetStat">$0</strong><span>trip spend</span></div>
+          <div><strong id="tripPackingStat">0%</strong><span>packed</span></div>
+          <div><strong id="tripNotesStat">0</strong><span>notes</span></div>
+        </div>
+        <button class="ghost wide" onclick="startAnotherTrip()">＋ Start another trip</button>
+      </section>
+
       <section class="card" id="money">
         <div class="section-head"><div><span class="kicker">SAVE & TRACK</span><h2>💰 Trip Budget</h2></div></div>
         <div class="budget-grid">
@@ -242,6 +257,7 @@ function render() {
 
   renderStaySummary();
   renderCountdown();
+  renderMyTrip();
   updateWelcome();
   renderRewards();
   renderNotes();
@@ -259,6 +275,49 @@ function dismissWelcome() {
 function updateWelcome() {
   const panel = document.getElementById("welcomePanel");
   if (panel) panel.style.display = localStorage.getItem("hep_welcomed") === "1" ? "none" : "flex";
+}
+
+function getTripStatus() {
+  const now = Date.now();
+  const start = state.hotel.checkIn ? new Date(state.hotel.checkIn).getTime() : 0;
+  const end = state.hotel.checkOut ? new Date(state.hotel.checkOut).getTime() : 0;
+  if (!start && !end) return { key: "ready", label: "READY", text: "Add your hotel dates to activate your trip dashboard." };
+  if (start && now < start) return { key: "upcoming", label: "UPCOMING", text: "Your trip is coming up. Get your essentials ready." };
+  if (end && now < end) return { key: "active", label: "CHECKED IN", text: "You're in the middle of your saved stay." };
+  return { key: "complete", label: "COMPLETE", text: "This stay has passed. Start another trip whenever you're ready." };
+}
+
+function renderMyTrip() {
+  const summary = document.getElementById("myTripSummary");
+  const badge = document.getElementById("tripStatusBadge");
+  if (!summary || !badge) return;
+  const status = getTripStatus();
+  badge.textContent = status.label;
+  const h = state.hotel;
+  const completedPacking = state.packing.filter(item => item.done).length;
+  const packingPct = state.packing.length ? Math.round(completedPacking / state.packing.length * 100) : 0;
+  const fields = ["hotelCost","foodCost","gasCost","funCost","otherCost"];
+  const savedBudget = JSON.parse(localStorage.getItem("hep_budget") || "null");
+  const total = savedBudget?.total ?? 0;
+  document.getElementById("tripBudgetStat").textContent = money(total);
+  document.getElementById("tripPackingStat").textContent = packingPct + "%";
+  document.getElementById("tripNotesStat").textContent = String(state.notes.length);
+  summary.innerHTML = `
+    <div class="trip-status">${status.text}</div>
+    <div class="trip-main"><strong>${esc(h.name || "No hotel saved yet")}</strong>${h.room ? `<span>Room ${esc(h.room)}</span>` : ""}</div>
+    ${h.address ? `<div class="trip-line">📍 ${esc(h.address)}</div>` : "<div class=\"trip-line muted\">Save your hotel address for one-tap directions.</div>"}
+    ${h.checkIn ? `<div class="trip-line">🕐 ${esc(new Date(h.checkIn).toLocaleString([], {dateStyle:"medium",timeStyle:"short"}))}${h.checkOut ? ` → ${esc(new Date(h.checkOut).toLocaleString([], {dateStyle:"medium",timeStyle:"short"}))}` : ""}</div>` : ""}
+  `;
+}
+
+function startAnotherTrip() {
+  if (!confirm("Start a new trip? Your saved rewards, notes and packing list will stay on this device.")) return;
+  state.hotel = { name: "", address: "", checkIn: "", checkOut: "", room: "" };
+  localStorage.removeItem("hep_budget");
+  persist();
+  trackEvent("start_another_trip");
+  render();
+  scrollToId("stay");
 }
 
 function renderCountdown() {
@@ -404,6 +463,8 @@ function calculateBudget() { trackEvent("budget_calculated");
   const total = fields.reduce((sum, id) => sum + (Number(document.getElementById(id).value) || 0), 0);
   const limit = Number(document.getElementById("budgetLimit").value) || 0;
   const difference = limit - total;
+  localStorage.setItem("hep_budget", JSON.stringify({ total, limit, difference }));
+  renderMyTrip();
   document.getElementById("budgetResult").innerHTML = limit
     ? `<strong>Total: ${money(total)}</strong><br><small>${difference >= 0 ? "You are " + money(difference) + " under budget." : "You are " + money(Math.abs(difference)) + " over budget."}</small>`
     : `<strong>Estimated trip total: ${money(total)}</strong>`;
@@ -486,7 +547,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
