@@ -44,6 +44,7 @@ function money(value) {
 }
 
 function render() {
+  trackEvent("app_open");
   const checklist = state.checklist.length ? state.checklist : defaultChecklist.map(text => ({ text, done: false }));
   const packing = state.packing.length ? state.packing : defaultPacking.map(text => ({ text, done: false }));
   if (!state.checklist.length) state.checklist = checklist;
@@ -443,6 +444,8 @@ async function shareApp() {
   else if (navigator.clipboard) { await navigator.clipboard.writeText(location.href); alert("App link copied. You can paste it into a text or Messenger."); }
   else alert("Copy the page address to share Hotel Easy Pass.");
 }
+
+if (window.matchMedia?.("(display-mode: standalone)").matches) trackEvent("pwa_open");
 
 const style = document.createElement("style");
 style.textContent = `
