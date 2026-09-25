@@ -36,3 +36,10 @@ This project can be hosted with GitHub Pages. Keep `index.html` at the top level
 
 ## Important
 Do not place passwords, payment card numbers, API secrets or private credentials in this repository.
+
+
+## Two-sided package
+- Public landing page with separate Traveler Pass and Hotel Owner Hub entry points.
+- Dedicated traveler.html experience using the existing travel toolkit.
+- Dedicated owner.html workspace for property profiles and offer drafts.
+- Core owner/traveler drafts are stored locally on the user's device until live accounts/backend services are connected.
