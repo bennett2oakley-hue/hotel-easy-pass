@@ -54,11 +54,11 @@ function render() {
   document.getElementById("app").innerHTML = `
     <div class="hep">
       <header class="hero">
-        <div class="logo">🏨</div>
+        <div class="logo" aria-hidden="true">🏨</div>
         <div>
           <div class="eyebrow">TRAVEL SMARTER</div>
           <h1>Hotel Easy Pass</h1>
-          <p>Your pocket travel command center.</p>
+          <p>Your pocket travel command center.</p><div class="hero-pills"><span>✓ Free core tools</span><span>✓ No account required</span></div>
         </div>
       </header>
 
@@ -438,7 +438,7 @@ function renderPacking() {
     <button class="delete" onclick="deletePacking(${index})">×</button></div>`).join("");
 }
 
-async async function shareApp() {
+async function shareApp() {
   const shareData = { title: APP_NAME, text: "Try Hotel Easy Pass, a pocket travel command center.", url: location.href };
   if (navigator.share) { try { await navigator.share(shareData); } catch (_) {} }
   else if (navigator.clipboard) { await navigator.clipboard.writeText(location.href); alert("App link copied. You can paste it into a text or Messenger."); }
@@ -456,24 +456,24 @@ button,input,textarea{font:inherit}button{cursor:pointer}
 .hep{max-width:820px;margin:auto;padding-bottom:35px}
 .hero{background:linear-gradient(135deg,#087f78,#12a89d);color:white;padding:28px 20px;display:flex;align-items:center;gap:15px;box-shadow:0 5px 20px rgba(0,0,0,.12)}
 .logo{font-size:48px}.eyebrow,.kicker{font-size:11px;letter-spacing:2px;font-weight:800}.eyebrow{opacity:.85}
-h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.9}
+h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.92}.hero-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.hero-pills span{font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 8px;border-radius:99px}
 .nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .nav button{border:0;background:transparent;padding:9px 3px;color:#245b5a;font-weight:700}
 .welcome{padding:25px 20px 12px;display:flex;gap:15px;justify-content:space-between;align-items:center}
 .welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
 .quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:10px 15px}
-.quick-grid button,.essential-grid button{border:0;border-radius:15px;background:white;padding:14px 8px;color:#173b3b;box-shadow:0 3px 12px rgba(0,0,0,.08)}
-.quick-grid button{font-size:25px}.quick-grid span{display:block;font-size:12px;margin-top:5px}
-.card{background:white;margin:15px;padding:20px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,.08)}
+.quick-grid button,.essential-grid button{border:0;transition:transform .15s ease,box-shadow .15s ease;border-radius:15px;background:white;padding:14px 8px;color:#173b3b;box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.quick-grid button{font-size:25px}.quick-grid button:active,.market-item:active,.chips button:active{transform:scale(.98)}.quick-grid span{display:block;font-size:12px;margin-top:5px}
+.card{background:white;margin:15px;padding:20px;border-radius:20px;box-shadow:0 4px 18px rgba(0,0,0,.08);scroll-margin-top:58px}
 .card h2{margin:4px 0 8px}.card p{line-height:1.5}.section-head{display:flex;justify-content:space-between;align-items:start;gap:10px}.kicker{color:#087f78}
 .form{display:grid;gap:9px}.form.two{grid-template-columns:1fr 1fr}
 input,textarea{width:100%;border:1px solid #c8dddd;border-radius:12px;padding:13px;background:#fbffff;color:#173b3b}
 textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
-.primary,.secondary,.ghost{border-radius:12px;padding:12px 16px;font-weight:800;border:0}.primary{background:#087f78;color:white}.secondary{background:#e4f5f1;color:#087f78}.ghost{background:#f0f6f5;color:#376160}
+.primary,.secondary,.ghost{border-radius:12px;padding:12px 16px;font-weight:800;border:0;transition:transform .15s ease,opacity .15s ease}.primary:hover,.secondary:hover,.ghost:hover{opacity:.9}.primary{background:#087f78;color:white}.secondary{background:#e4f5f1;color:#087f78}.ghost{background:#f0f6f5;color:#376160}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
