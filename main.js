@@ -65,6 +65,7 @@ function render() {
       <nav class="nav" aria-label="Main navigation">
         <button onclick="scrollToId('stay')">🏨 Stay</button>
         <button onclick="scrollToId('myTrip')">🧭 My Trip</button>
+        <button onclick="scrollToId('owners')">🏨 Owners</button>
         <button onclick="scrollToId('explore')">📍 Explore</button>
         <button onclick="scrollToId('money')">💰 Money</button>
         <button onclick="scrollToId('tools')">🧳 Tools</button>
@@ -147,6 +148,29 @@ function render() {
         <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
       </section>
 
+      <section class="card owner-card" id="owners">
+        <div class="section-head"><div><span class="kicker">FOR HOTEL OWNERS</span><h2>🏨 Owner Hub</h2></div><span class="partner-badge">OWNER READY</span></div>
+        <p>Give properties a simple way to prepare promotions, guest perks and booking links for future publication.</p>
+        <div class="owner-grid">
+          <input id="ownerHotel" placeholder="Hotel / property name">
+          <input id="ownerContact" placeholder="Manager or contact name">
+          <input id="ownerOffer" placeholder="Special offer, e.g. 20% off">
+          <input id="ownerDates" placeholder="Offer dates">
+        </div>
+        <textarea id="ownerDetails" placeholder="Describe the promotion, restrictions, room types, perks or booking instructions..."></textarea>
+        <input id="ownerBooking" placeholder="Booking or reservation URL">
+        <div class="button-row">
+          <button class="primary" onclick="saveOwnerDraft()">💾 Save Offer Draft</button>
+          <button class="secondary" onclick="clearOwnerDraft()">Clear</button>
+        </div>
+        <div id="ownerDraftStatus" class="owner-status"></div>
+        <div class="owner-benefits">
+          <strong>Designed for owners</strong>
+          <span>✓ Simple promotion setup</span><span>✓ Reusable offer drafts</span><span>✓ Direct booking link support</span><span>✓ Ready for future featured placement</span>
+        </div>
+        <div class="specials-note"><strong>Future partner model:</strong> Hotel Easy Pass can offer free basic listings and optional paid featured placement or qualified booking referrals once live partner onboarding is connected.</div>
+      </section>
+
       <section class="card specials-card" id="specials">
         <div class="section-head"><div><span class="kicker">HOTEL SPECIALS</span><h2>🔥 Special for Specials</h2></div><span class="partner-badge">PROMO READY</span></div>
         <p>Hotels can showcase limited-time discounts, free upgrades, packages and other guest promotions right where travelers are planning their stay.</p>
@@ -164,6 +188,7 @@ function render() {
         </div>
         <button class="wide primary" onclick="scrollToId('explore');trackEvent('command_cta')">📍 Explore near me</button>
         <button class="wide secondary" onclick="scrollToId('specials');trackEvent('specials_cta')">🔥 See hotel specials</button>
+        <button class="wide ghost" onclick="scrollToId('owners');trackEvent('owner_hub_cta')">🏨 I'm a hotel owner</button>
       </section>
 
       <section class="card my-trip" id="myTrip">
@@ -268,6 +293,7 @@ function render() {
   renderCountdown();
   renderMyTrip();
   renderSpecials();
+  loadOwnerDraft();
   updateWelcome();
   renderRewards();
   renderNotes();
@@ -286,6 +312,41 @@ function updateWelcome() {
   const panel = document.getElementById("welcomePanel");
   if (panel) panel.style.display = localStorage.getItem("hep_welcomed") === "1" ? "none" : "flex";
 }
+
+function saveOwnerDraft() {
+  const draft = {
+    hotel: document.getElementById("ownerHotel").value.trim(),
+    contact: document.getElementById("ownerContact").value.trim(),
+    offer: document.getElementById("ownerOffer").value.trim(),
+    dates: document.getElementById("ownerDates").value.trim(),
+    details: document.getElementById("ownerDetails").value.trim(),
+    booking: document.getElementById("ownerBooking").value.trim()
+  };
+  if (!draft.hotel || !draft.offer) return alert("Add the hotel name and special offer first.");
+  localStorage.setItem("hep_owner_draft", JSON.stringify(draft));
+  document.getElementById("ownerDraftStatus").textContent = "✓ Offer draft saved on this device. It is not published yet.";
+  trackEvent("owner_offer_draft_saved");
+}
+
+function clearOwnerDraft() {
+  if (!confirm("Clear this owner offer draft?")) return;
+  localStorage.removeItem("hep_owner_draft");
+  ["ownerHotel","ownerContact","ownerOffer","ownerDates","ownerDetails","ownerBooking"].forEach(id => { const el=document.getElementById(id); if(el) el.value=""; });
+  document.getElementById("ownerDraftStatus").textContent = "";
+}
+
+function loadOwnerDraft() {
+  const draft = JSON.parse(localStorage.getItem("hep_owner_draft") || "null");
+  if (!draft) return;
+  ["hotel","contact","offer","dates","details","booking"].forEach(key => {
+    const id = "owner" + key.charAt(0).toUpperCase() + key.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.value = draft[key] || "";
+  });
+  const status = document.getElementById("ownerDraftStatus");
+  if (status) status.textContent = "✓ Saved owner draft loaded.";
+}
+
 
 function renderSpecials() {
   const box = document.getElementById("specialsList");
@@ -557,7 +618,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}
 .hero{background:linear-gradient(135deg,#087f78,#12a89d);color:white;padding:28px 20px;display:flex;align-items:center;gap:15px;box-shadow:0 5px 20px rgba(0,0,0,.12)}
 .logo{font-size:48px}.eyebrow,.kicker{font-size:11px;letter-spacing:2px;font-weight:800}.eyebrow{opacity:.85}
 h1{margin:3px 0;font-size:30px}.hero p{margin:0;opacity:.92}.hero-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.hero-pills span{font-size:11px;font-weight:700;background:rgba(255,255,255,.16);padding:5px 8px;border-radius:99px}
-.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.nav{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(6,1fr);gap:5px;padding:7px;background:rgba(255,255,255,.96);box-shadow:0 2px 12px rgba(0,0,0,.08)}
 .nav button{border:0;background:transparent;padding:9px 3px;color:#245b5a;font-weight:700}
 .welcome{padding:25px 20px 12px;display:flex;gap:15px;justify-content:space-between;align-items:center}
 .welcome h2{margin:8px 0}.welcome p{line-height:1.55;margin:0}.welcome .primary{box-shadow:0 6px 16px rgba(8,127,120,.18)}.badge{display:inline-block;background:#d8f1ed;color:#087f78;padding:6px 9px;border-radius:99px;font-size:10px;font-weight:800}
@@ -573,7 +634,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .wide{width:100%;margin-top:10px}.button-row{display:flex;gap:9px;margin-top:9px}.button-row button{flex:1}
 .search-row{display:flex;gap:8px}.search-row button{white-space:nowrap}
 .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}.chips button{border:1px solid #c8dddd;background:#f8fcfb;border-radius:99px;padding:7px 10px;color:#245b5a}
-.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.specials-card{border:1px solid #f0dfbf;background:linear-gradient(180deg,#fff,#fffaf1)}.specials-list{display:grid;gap:9px;margin-top:12px}.special-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid #eadfca;border-radius:14px;background:#fff}.special-icon{font-size:25px}.special-item strong{display:block;margin-top:3px}.special-item p{margin:4px 0 0;font-size:13px;color:#557070}.special-tag{font-size:9px;font-weight:900;letter-spacing:1px;color:#8a5a12;background:#fff0cf;padding:4px 6px;border-radius:7px}.specials-note{margin-top:12px;padding:11px;border-radius:11px;background:#fff4dc;font-size:11px;color:#6f5a37}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
+.onboarding{margin:15px;scroll-margin-top:58px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);box-shadow:0 4px 18px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;gap:15px}.onboarding h2{margin:8px 0}.onboarding p{margin:0;line-height:1.5}.countdown{margin-top:9px;padding:10px 12px;border-radius:10px;background:#dff3ee;color:#087f78;font-size:14px}.revenue-card{border:1px solid #cfe8e3}.partner-badge{font-size:10px;font-weight:900;background:#d8f1ed;color:#087f78;padding:6px 8px;border-radius:99px}.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.market-item{display:block;text-decoration:none;color:#173b3b;background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:14px}.market-item strong{display:block}.market-item small{display:block;color:#557070;margin-top:4px}.affiliate-note{font-size:11px;color:#6a7c7c;margin-top:12px}.command-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.command-grid div{background:#f4faf9;border:1px solid #dceceb;border-radius:14px;padding:13px}.command-grid strong{display:block;font-size:22px;color:#087f78}.command-grid span{display:block;margin-top:3px;font-size:13px}.trip-command{border:1px solid #cfe8e3}.owner-card{border:1px solid #cfe8e3;background:linear-gradient(180deg,#fff,#f4fbfa)}.owner-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px}.owner-card textarea{margin-top:0}.owner-status{margin-top:10px;color:#087f78;font-size:13px;font-weight:700}.owner-benefits{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:12px}.owner-benefits span,.owner-benefits strong{padding:9px;border-radius:10px;background:#edf8f6;font-size:11px}.owner-benefits strong{grid-column:1/-1;color:#087f78}.specials-card{border:1px solid #f0dfbf;background:linear-gradient(180deg,#fff,#fffaf1)}.specials-list{display:grid;gap:9px;margin-top:12px}.special-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border:1px solid #eadfca;border-radius:14px;background:#fff}.special-icon{font-size:25px}.special-item strong{display:block;margin-top:3px}.special-item p{margin:4px 0 0;font-size:13px;color:#557070}.special-tag{font-size:9px;font-weight:900;letter-spacing:1px;color:#8a5a12;background:#fff0cf;padding:4px 6px;border-radius:7px}.specials-note{margin-top:12px;padding:11px;border-radius:11px;background:#fff4dc;font-size:11px;color:#6f5a37}.my-trip{border:1px solid #cfe8e3;background:linear-gradient(180deg,#ffffff,#f1faf8)}.my-trip-summary{padding:13px;border-radius:14px;background:#edf8f6}.trip-status{font-size:13px;color:#087f78;margin-bottom:8px}.trip-main{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.trip-main span{font-size:11px;background:#d7eee9;padding:4px 7px;border-radius:8px}.trip-line{margin-top:7px;font-size:13px;color:#557070}.trip-actions{display:flex;gap:9px;margin-top:10px}.trip-actions>*{flex:1}.trip-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.trip-stats div{background:white;border:1px solid #dceceb;border-radius:12px;padding:10px;text-align:center}.trip-stats strong{display:block;color:#087f78;font-size:18px}.trip-stats span{font-size:10px;color:#557070}.budget-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.result{margin-top:12px;padding:15px;border-radius:12px;background:#e4f5ee;font-size:17px}
 .saved-item{margin-top:10px;padding:13px;border-radius:13px;background:#edf8f7;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .saved-item small{display:block;opacity:.7;margin-top:3px}.saved-item p{margin-bottom:0}.delete{border:0;background:#f1dddd;color:#8b2d2d;padding:8px 10px;border-radius:9px}.empty,.muted{opacity:.6}
 .stay-summary{margin-top:12px;padding:13px;border-radius:13px;background:#f0faf8}.stay-summary small{display:block;margin-top:5px;color:#557070}.room{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:7px;background:#d7eee9;font-size:12px}
