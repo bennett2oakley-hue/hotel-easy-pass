@@ -1,7 +1,7 @@
 # HOTEL EASY PASS — SALE LISTING PACKAGE
 
 ## Recommended listing position
-**Asking price: $7,500 USD OBO**
+**Asking price: $24,997 USD OBO**
 
 This is an asking price for negotiation, not a claim of current revenue or an independent valuation. The asset is currently pre-revenue and has no verified customer base or booking revenue.
 
@@ -9,25 +9,26 @@ This is an asking price for negotiation, not a claim of current revenue or an in
 **Hotel Easy Pass — Two-Sided Travel PWA + Hotel Owner Platform**
 
 ## One-line pitch
-A polished mobile-first travel web app that combines a practical traveler toolkit with a dedicated hotel-owner promotion hub, built as a lightweight installable PWA.
+A polished mobile-first travel platform combining a practical traveler toolkit with a dedicated hotel-owner experience, room-condition documentation, emergency travel tools, and a roadmap toward hotel integrations and digital room keys.
 
 ## Full listing description
-Hotel Easy Pass is a ready-to-demo, mobile-first travel platform designed around a simple idea: travelers should have the useful parts of a hotel stay in one place, while hotels should have a straightforward way to prepare guest offers and connect with travelers.
-
-The package now has two clearly separated sides:
+Hotel Easy Pass is a mobile-first hospitality technology product designed around two audiences: travelers who want a simple command center for their hotel stay, and hotel owners who need a straightforward guest-engagement and promotion foundation.
 
 ### Traveler Pass
 - Hotel stay dashboard
 - Check-in and check-out details
+- Room-condition check-in and check-out photo documentation
+- Optional photo notes
 - Nearby food, attractions, groceries, gas, pharmacy, coffee, laundry and ATMs
-- Travel marketplace links
+- Travel marketplace structure
 - Trip budget calculator
 - Rewards tracker
-- Packing list and hotel checklists
+- Packing and hotel checklists
+- Tip calculator
 - Trip notes
 - Trip sharing
 - Emergency travel shortcuts
-- PWA installation support
+- Installable PWA
 - Mobile-first responsive design
 - Local-device storage for core trip information
 
@@ -41,6 +42,7 @@ The package now has two clearly separated sides:
 - Direct booking URL
 - Offer descriptions
 - Saved offer drafts
+- Before-guest and after-checkout room-condition documentation
 - Future featured-placement architecture
 - Future partner/referral tracking architecture
 
@@ -53,58 +55,67 @@ The package now has two clearly separated sides:
 - SEO metadata
 - Privacy page
 - Terms page
+- FAQ
 - Custom 404 page
 - No required backend for the current core experience
 - No passwords, payment information or API secrets stored in the repository
 
-### Business model already planned into the product
-The platform is structured for future monetization through:
-1. Hotel/experience/flight referral partnerships
-2. Hotel featured placements
-3. Local partner promotions
-4. Direct booking referrals
-5. Optional premium traveler or hotel-owner features
+### Business expansion paths
+A buyer can build on the foundation with:
+1. Hotel PMS/channel-manager integrations
+2. Live inventory and reservations
+3. Secure guest accounts
+4. Cloud room-photo storage and retention controls
+5. Digital identity/check-in
+6. Compatible mobile room-key integrations
+7. Hotel subscriptions
+8. Featured hotel offers
+9. Affiliate/booking attribution
+10. Hotel analytics and owner dashboards
+11. White-label hotel versions
+12. API/integration partnerships
 
-The current marketplace links are ordinary outbound links until approved affiliate or partner tracking is connected. No current revenue is represented.
+### Smart Room Key
+The product roadmap supports a phone-as-room-key concept. Actual door unlocking requires compatible hotel access-control systems, authentication, security review and hotel-side agreements. The current PWA does not claim to unlock arbitrary hotel doors.
 
 ### What the buyer receives
 - Hotel Easy Pass source code
 - Traveler Pass
 - Hotel Owner Hub
+- Room documentation workflows
 - PWA files
 - GitHub Pages deployment configuration
-- Documentation
+- Buyer/seller documentation
 - Privacy and Terms pages
 - Monetization roadmap
-- Buyer handoff instructions
-- Rights to continue development and rebrand the asset after transfer
+- Rebranding/development foundation
 
 ### Current status
 **Pre-revenue / ready-to-demo digital asset.**
 
-There are no verified monthly users, customers, booking commissions or recurring revenues being represented in this listing.
+There are no verified monthly users, customers, booking commissions or recurring revenues being represented.
 
 ### Ideal buyer
 - Hotel technology company
 - Independent hotel operator or hotel group
+- Hospitality software entrepreneur
 - Travel startup
 - Hospitality marketing agency
 - Travel affiliate entrepreneur
-- Developer looking for a ready-made travel PWA
-- Founder who wants to add a booking/affiliate backend and turn the front end into a larger travel platform
+- Developer or agency seeking a hospitality product foundation
 
-### Why it is interesting
-The project is intentionally not designed as another cluttered hotel-search clone. It separates the traveler utility experience from the hotel-owner commercial experience, leaving room for a buyer to add real hotel inventory, authentication, payments, affiliate APIs, booking APIs, analytics and partner accounts.
+### Suggested positioning
+**“The simple hotel-stay companion for travelers, with a hotel-owner side built in.”**
 
-## Suggested buyer conversation
-The seller can demonstrate the live app, explain the architecture, show the GitHub repository and answer technical questions. Buyer should perform their own due diligence before payment.
+The product is deliberately positioned around practical hotel-stay utility rather than becoming another generic travel-search clone.
+
+## Buyer due diligence
+The buyer should independently inspect the repository, test the application, review the legal pages and confirm the technical scope before purchase.
 
 ## Transfer
-Preferred transfer is through a secure marketplace/escrow process. Once payment and transfer conditions are satisfied, transfer the GitHub repository and any separately included domains/accounts/assets according to the final purchase agreement.
+Use a written purchase agreement and, where appropriate, a reputable escrow or marketplace process. Transfer the repository and any separately included assets only after the agreed payment/transfer conditions are satisfied.
 
 ## Important disclosure
-Hotel Easy Pass is a software/digital asset. It is not currently represented as a profitable operating business. Any future revenue depends on implementation, traffic, users, partnerships, conversion rates and other factors outside the current asset.
+Hotel Easy Pass is a software/digital asset and is not currently represented as a profitable operating business. The asking price reflects the product concept, source code, feature foundation, two-sided architecture and expansion opportunity, not current earnings.
 
-
-### New release feature: room condition documentation
-The two-sided package now includes traveler check-in/check-out photo documentation and a hotel-owner room condition inspection workflow. This gives a buyer a clear expansion path into digital guest inspection reports, maintenance workflows, authenticated records, cloud storage, and hotel-system integrations. The current release stores photos locally and does not claim universal hotel-system integration.
+Repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
