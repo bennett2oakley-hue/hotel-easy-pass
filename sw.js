@@ -1,4 +1,4 @@
-const CACHE_NAME = "hotel-easy-pass-v4";
+const CACHE_NAME = "hotel-easy-pass-v5";
 const FILES_TO_CACHE = ["./", "./index.html", "./main.js", "./manifest.webmanifest", "./traveler.html", "./owner.html"];
 
 self.addEventListener("install", event => {
