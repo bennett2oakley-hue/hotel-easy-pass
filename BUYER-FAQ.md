@@ -23,3 +23,7 @@ Connecting real hotel inventory and owner onboarding while keeping the simple tr
 
 **How is it transferred?**  
 The preferred method is a secure marketplace/escrow transaction followed by GitHub repository transfer and any separately agreed asset transfers.
+
+
+### Does Hotel Easy Pass include room photo documentation?
+Yes. The current release includes traveler check-in and check-out photo capture plus optional notes, and an owner-side before-arrival/after-checkout room condition record. Photos remain local to the browser in this version. It is documentation, not an automated dispute-resolution system.
