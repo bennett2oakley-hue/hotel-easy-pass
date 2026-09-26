@@ -23,5 +23,8 @@ jobs:
           cache: npm
           cache-dependency-path: package.json
 
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+
       - name: Run smoke tests
         run: npm test
