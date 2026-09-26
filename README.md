@@ -54,6 +54,11 @@ The project is configured for GitHub Pages. The latest Pages deployment workflow
 - [BUYER-FAQ.md](./BUYER-FAQ.md)
 - [MONETIZATION.md](./MONETIZATION.md)
 - [SALE-LISTING.md](./SALE-LISTING.md)
+- [SELLER-HANDOFF.md](./SELLER-HANDOFF.md)
+
+## Sale package
+
+The repository includes a ready-to-use sale listing and seller handoff guide so a buyer can review the product, technical boundaries and transfer terms in one place.
 
 ## Security
 
