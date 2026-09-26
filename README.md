@@ -43,3 +43,7 @@ Do not place passwords, payment card numbers, API secrets or private credentials
 - Dedicated traveler.html experience using the existing travel toolkit.
 - Dedicated owner.html workspace for property profiles and offer drafts.
 - Core owner/traveler drafts are stored locally on the user's device until live accounts/backend services are connected.
+
+
+### Room condition photo documentation
+The traveler side includes private on-device check-in and check-out room photo documentation with optional notes. The owner hub includes before-guest and after-checkout room condition photo records. Photos are not uploaded to a Hotel Easy Pass server in the current static version.
