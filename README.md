@@ -22,7 +22,13 @@ Hotel Easy Pass is designed as a clean, low-friction travel utility rather than 
 - Promotion and offer drafts
 - Direct booking link support
 - Guest perks and local recommendations
+- Room-condition inspection workflow
+- Product analytics dashboard
 - Space for future hotel-partner features
+
+## Product analytics
+
+Hotel Easy Pass includes privacy-conscious, browser-local product analytics. Lightweight events are stored locally under `hep_events`, capped at the latest 100 events. The dashboard at `dashboard.html` provides event counts, top features, recent activity and JSON export. No third-party analytics SDK or remote event collector is required by the current build.
 
 ## Design approach
 
@@ -34,6 +40,8 @@ The interface uses a mobile-first card system, high-contrast teal branding, larg
 - Progressive Web App manifest
 - Service worker
 - Browser-local persistence for current user data
+- Browser-local product analytics
+- IndexedDB room-photo storage on supported browsers
 - No required application server
 - No required database
 - No framework build step
