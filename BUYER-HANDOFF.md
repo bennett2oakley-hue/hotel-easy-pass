@@ -55,3 +55,7 @@ Static/mobile-first PWA. Core traveler and owner data is stored locally in the b
 - Reviews/ratings
 - Payment/subscription layer
 - Admin dashboard
+
+
+### New room documentation feature
+The release now includes traveler check-in/check-out room photo documentation and an owner-side room condition inspection record. The current static architecture keeps these photos on the user's device/browser and does not provide a shared cloud record. A future buyer can extend this into authenticated guest-owner inspection reports, cloud storage, timestamps, dispute workflows, and property-management integrations.
