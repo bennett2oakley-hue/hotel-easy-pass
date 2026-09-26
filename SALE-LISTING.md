@@ -104,3 +104,7 @@ Preferred transfer is through a secure marketplace/escrow process. Once payment 
 
 ## Important disclosure
 Hotel Easy Pass is a software/digital asset. It is not currently represented as a profitable operating business. Any future revenue depends on implementation, traffic, users, partnerships, conversion rates and other factors outside the current asset.
+
+
+### New release feature: room condition documentation
+The two-sided package now includes traveler check-in/check-out photo documentation and a hotel-owner room condition inspection workflow. This gives a buyer a clear expansion path into digital guest inspection reports, maintenance workflows, authenticated records, cloud storage, and hotel-system integrations. The current release stores photos locally and does not claim universal hotel-system integration.
