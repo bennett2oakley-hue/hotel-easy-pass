@@ -1,49 +1,60 @@
 # Hotel Easy Pass
 
-Hotel Easy Pass is a mobile-first travel toolkit built as a lightweight Progressive Web App.
+Hotel Easy Pass is a mobile-first Progressive Web App designed as a simple two-sided hospitality platform: one experience for travelers and one workspace for hotel owners.
 
-## Current features
+## Traveler Pass
+
 - Hotel stay dashboard with check-in/check-out details
-- Check-in countdown
-- Trip sharing
-- Nearby food, attractions, groceries, gas, pharmacy, coffee, laundry and ATMs
-- Travel marketplace for hotels, experiences, flights and day passes
+- Check-in countdown and trip sharing
+- Nearby food, attractions, groceries, gas, pharmacy, coffee, laundry, ATMs and urgent care
+- Travel marketplace structure for hotels, experiences and travel services
 - Trip budget calculator
 - Rewards wallet
 - Hotel and packing checklists
 - Tip calculator
 - Trip notes
-- Emergency quick links
+- Emergency travel shortcuts
+- Private check-in and check-out room photo documentation
+- Optional notes attached to photo events
 - PWA install support
-- Privacy and terms pages
-- SEO files and custom 404 page
+
+## Hotel Owner Hub
+
+- Property profile
+- Guest promotion/offer drafts
+- Direct booking URL support
+- Guest perks and local recommendations
+- Before-guest and after-checkout room-condition documentation
+- Future featured placement and referral architecture
+
+## Photo documentation
+
+The traveler side stores room photos in IndexedDB on the user's device. The owner side stores inspection records locally in the browser. The current static version does not upload photos to a Hotel Easy Pass server.
+
+## Smart Room Key direction
+
+The product can be extended into a phone-based room-key experience, but actual door unlocking requires a compatible hotel access-control/lock integration. The current PWA should not be represented as capable of unlocking arbitrary hotel doors.
 
 ## Revenue architecture
-The marketplace is prepared for approved affiliate/deep links, but the current outbound links are ordinary links until real partner tracking is connected. Actual revenue and user-growth metrics must be measured after deployment and partner approval.
 
-## Buyer-ready metrics to add later
-- Monthly active users
-- Returning users
-- Marketplace click-through rate
-- Completed bookings
-- Monthly affiliate revenue
-- Revenue per active user
-- Acquisition sources
-- Operating costs and profit
+The marketplace is prepared for approved affiliate/deep links, but current outbound links are ordinary links until real partner tracking is connected. Potential future revenue models include hotel subscriptions, featured offers, qualified booking referrals, premium traveler tools, hotel-branded versions and API/integration partnerships.
+
+## Current technical boundaries
+
+The repository is a static/PWA foundation. It does not currently include a hosted account database, payment processing, live hotel inventory, booking fulfillment, affiliate credentials or universal smart-lock integration.
 
 ## Deployment
-This project can be hosted with GitHub Pages. Keep `index.html` at the top level of the published source.
 
-## Important
+The project is configured for GitHub Pages. The latest Pages deployment workflow completed successfully on September 26, 2026.
+
+## Buyer documentation
+
+- [BUYER-PACKAGE.md](./BUYER-PACKAGE.md)
+- [BUYER-HANDOFF.md](./BUYER-HANDOFF.md)
+- [BUYER-FAQ.md](./BUYER-FAQ.md)
+- [MONETIZATION.md](./MONETIZATION.md)
+- [SALE-LISTING.md](./SALE-LISTING.md)
+
+## Security
+
 Do not place passwords, payment card numbers, API secrets or private credentials in this repository.
-
-
-## Two-sided package
-- Public landing page with separate Traveler Pass and Hotel Owner Hub entry points.
-- Dedicated traveler.html experience using the existing travel toolkit.
-- Dedicated owner.html workspace for property profiles and offer drafts.
-- Core owner/traveler drafts are stored locally on the user's device until live accounts/backend services are connected.
-
-
-### Room condition photo documentation
-The traveler side includes private on-device check-in and check-out room photo documentation with optional notes. The owner hub includes before-guest and after-checkout room condition photo records. Photos are not uploaded to a Hotel Easy Pass server in the current static version.
