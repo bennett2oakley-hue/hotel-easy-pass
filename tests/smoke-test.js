@@ -28,7 +28,7 @@ for (const marker of ["Hotel Easy Pass", "traveler.html", "owner.html"]) {
   if (!index.includes(marker)) throw new Error("index.html missing expected marker: " + marker);
 }
 if (!manifest.includes("name")) throw new Error("manifest.webmanifest is missing an app name");
-if (!main.includes("DOMContentLoaded")) throw new Error("main.js does not contain expected app bootstrap");
+if (!main.includes("function render")) throw new Error("main.js does not contain the expected app renderer");
 
 console.log("Hotel Easy Pass smoke tests passed.");
 console.log(`Checked ${required.length} required application files.`);
