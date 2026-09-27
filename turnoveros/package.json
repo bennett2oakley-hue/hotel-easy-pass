@@ -1,1 +1,1 @@
-{"name":"turnoveros","version":"1.0.0","private":true,"scripts":{"start":"node server.js"}}
+{"name":"turnoveros","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"dependencies":{"pg":"^8.16.3"}}
