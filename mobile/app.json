@@ -7,20 +7,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "scheme": "hotel-easy-pass",
-    "android": {
-      "package": "com.bennett2oakley.hoteleasypass",
-      "versionCode": 1
-    },
-    "ios": {
-      "bundleIdentifier": "com.bennett2oakley.hoteleasypass",
-      "supportsTablet": true
-    },
-    "web": {
-      "bundler": "metro"
-    },
-    "plugins": ["react-native-webview"],
-    "extra": {
-      "productionUrl": "https://hotel-easy-pass.onrender.com"
-    }
+    "android": {"package": "com.bennett2oakley.hoteleasypass", "versionCode": 1},
+    "ios": {"bundleIdentifier": "com.bennett2oakley.hoteleasypass", "supportsTablet": true},
+    "web": {"bundler": "metro"},
+    "extra": {"productionUrl": "https://hotel-easy-pass.onrender.com"}
   }
 }
