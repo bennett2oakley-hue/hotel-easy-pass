@@ -5,6 +5,8 @@ import { WebView } from "react-native-webview";
 
 const APP_URL = "https://hotel-easy-pass.onrender.com";
 
+const MobileWebView = WebView as unknown as React.ComponentType<any>;
+
 export default function App() {
   const webViewRef = useRef<WebView>(null);
   const [loading, setLoading] = useState(true);
@@ -46,8 +48,8 @@ export default function App() {
           <ActivityIndicator size="large" color="#0f766e" />
         </View>
       )}
-      <WebView
-        ref={webViewRef}
+      <MobileWebView
+        ref={webViewRef as any}
         source={{ uri: APP_URL }}
         style={styles.webview}
         originWhitelist={["https://*", "http://*"]}
