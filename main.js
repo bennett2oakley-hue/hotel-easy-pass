@@ -54,88 +54,318 @@ function money(value) {
 }
 
 function render(){
-  if(!state.traveler.name){
-    document.getElementById("app").innerHTML=`
-      <section class="journey-card">
-        <div class="journey-logo">🏨</div>
-        <span class="badge">HOTEL EASY PASS</span>
-        <h1>Welcome! 👋</h1>
-        <p class="journey-lead">Before we get started, what should we call you?</p>
-        <label class="journey-label" for="travelerName">First name or nickname</label>
-        <input id="travelerName" class="journey-input" autocomplete="given-name" placeholder="What should we call you?">
-        <p class="journey-note">Don't worry. This isn't the name that will be used for your hotel, flight, or other reservations. We'll ask for that information when it's needed.</p>
-        <button class="primary journey-button" onclick="beginJourney()">Let's Get Started →</button>
-      </section>`;
+  const t=state.traveler;
+  if(!t.name){
+    renderNameStep();
     return;
   }
+  if(!t.inputMode){ renderJourneyStep("mode"); return; }
+  if(!t.onboardingComplete){ renderJourneyStep(t.onboardingStep||"trip"); return; }
   renderDashboard();
+}
+
+function renderNameStep(){
+  document.getElementById("app").innerHTML=\`
+    <section class="journey-card">
+      <div class="journey-logo">🏨</div>
+      <span class="badge">HOTEL EASY PASS</span>
+      <h1>Welcome! 👋</h1>
+      <p class="journey-lead">Let's make your trip easier, one simple step at a time.</p>
+      <label class="journey-label" for="travelerName">What should we call you?</label>
+      <input id="travelerName" class="journey-input" autocomplete="given-name" placeholder="First name or nickname">
+      <p class="journey-note">Don't worry. This isn't the name that will be used for your hotel, flight, or other reservations. We'll ask for that information when it's needed.</p>
+      <button class="primary journey-button" onclick="beginJourney()">Let's Get Started →</button>
+    </section>\`;
+  document.getElementById("travelerName")?.focus();
 }
 
 function beginJourney(){
   const input=document.getElementById("travelerName");
   const name=(input?.value||"").trim();
-  if(!name){ input?.focus(); return; }
+  if(!name){input?.focus();return;}
   state.traveler.name=name;
+  state.traveler.inputMode="";
+  state.traveler.onboardingStep="mode";
+  state.traveler.onboardingComplete=false;
   persist();
-  renderJourneyStep("trip");
+  renderJourneyStep("mode");
 }
 
 function renderJourneyStep(step){
   const t=state.traveler;
-  const content={
-    trip:{
-      kicker:"NICE TO MEET YOU, "+esc(t.name.toUpperCase()),
-      title:"Where are you traveling?",
-      body:"Tell us where you're headed. We'll keep the rest of the trip focused on what matters to you.",
-      html:`<input id="destination" class="journey-input" placeholder="City, state or destination" value="${esc(t.destination)}"><div class="choice-grid"><button onclick="chooseTrip('Business')">💼 Business</button><button onclick="chooseTrip('Emergency')">🚨 Emergency</button><button onclick="chooseTrip('Leisure')">🌴 Leisure</button><button onclick="chooseTrip('Family')">👨‍👩‍👧 Family</button></div>`
-    },
-    travelers:{
-      kicker:t.tripType.toUpperCase()+" TRIP",
-      title:"Who's traveling?",
-      body:"We'll use this to keep recommendations relevant.",
-      html:`<div class="number-row"><button onclick="adjustTravelers(-1)">−</button><strong id="travelerCount">${t.travelers}</strong><button onclick="adjustTravelers(1)">+</button></div><button class="primary journey-button" onclick="nextJourney('days')">Continue →</button>`
-    },
-    days:{
-      kicker:"TRIP LENGTH",
-      title:"How many days will you be staying?",
-      body:"A rough number is fine. You can change it later.",
-      html:`<div class="number-row"><button onclick="adjustDays(-1)">−</button><strong id="dayCount">${t.days}</strong><button onclick="adjustDays(1)">+</button></div><button class="primary journey-button" onclick="nextJourney('hotel')">Continue →</button>`
-    },
-    hotel:{
-      kicker:"STAY",
-      title:"Do you already have a hotel?",
-      body:"We'll focus hotel suggestions around your trip type and preferences.",
-      html:`<div class="choice-grid"><button onclick="setJourneyChoice('hotel','have')">🏨 I have one</button><button onclick="setJourneyChoice('hotel','need')">🔎 I need one</button></div>`
-    },
-    rental:{
-      kicker:"TRANSPORTATION",
-      title:"Do you need a rental car?",
-      body:"No problem if you're not sure yet.",
-      html:`<div class="choice-grid"><button onclick="setJourneyChoice('rental','have')">🚗 I have one</button><button onclick="setJourneyChoice('rental','need')">🔎 I need one</button><button onclick="setJourneyChoice('rental','no')">No rental needed</button><button onclick="setJourneyChoice('rental','undecided')">Not sure yet</button></div>`
-    },
-    flight:{
-      kicker:"FLIGHT",
-      title:"What about your flight?",
-      body:"We'll keep flight planning separate from your reservation details.",
-      html:`<div class="choice-grid"><button onclick="setJourneyChoice('flight','have')">✈️ I have one</button><button onclick="setJourneyChoice('flight','need')">🔎 I need one</button><button onclick="setJourneyChoice('flight','no')">No flight needed</button><button onclick="setJourneyChoice('flight','undecided')">Not sure yet</button></div>`
-    }
+  t.onboardingStep=step;
+  persist();
+
+  const tripChoices={
+    Business:[
+      ["🏢","Meeting / conference","Work travel, meetings or events"],
+      ["💻","Working remotely","A productive place to work"],
+      ["🚗","Traveling between locations","Convenience and transportation"],
+      ["✈️","Flying in for business","Airport and work logistics"]
+    ],
+    Family:[
+      ["🏖️","Vacation","A comfortable family getaway"],
+      ["🎢","Attractions","Fun things for everyone"],
+      ["👨‍👩‍👧","Visiting family","Easy family logistics"],
+      ["🚗","Road trip","Stops, parking and convenience"]
+    ],
+    Leisure:[
+      ["🌴","Vacation","Relax and enjoy the destination"],
+      ["🎟️","Explore","Attractions, events and experiences"],
+      ["🍽️","Food & fun","Restaurants, entertainment and local finds"],
+      ["🚗","Road trip","Stops, sights and easy travel"]
+    ],
+    Emergency:[
+      ["🚨","Urgent situation","Help me solve what matters right now"],
+      ["🏨","Need somewhere to stay","Find a safe, practical place"],
+      ["🚗","Need transportation","Help me get where I need to go"],
+      ["❓","I'm not sure","Help me figure out the next step"]
+    ]
   };
-  const s=content[step];
-  document.getElementById("app").innerHTML=`<section class="journey-card"><div class="journey-logo">🏨</div><span class="badge">${s.kicker}</span><h1>${s.title}</h1><p class="journey-lead">${s.body}</p>${s.html}<p class="journey-ai">Your trip will stay focused. Hotel Easy Pass uses your answers to surface the most relevant tools and recommendations.</p></section>`;
+
+  const needChoices={
+    Business:["🏨 A hotel that fits my work trip","📍 Something close to my meeting","🚗 Transportation","🅿️ Parking","🍽️ Business dining","🤫 Somewhere quiet to work"],
+    Family:["👨‍👩‍👧 Family-friendly hotel","🏊 Pool or kid-friendly amenities","🍳 Breakfast","🎢 Things to do with kids","🛒 Groceries","🚗 Transportation"],
+    Leisure:["🏨 A hotel","🍽️ Restaurants","🎟️ Attractions & events","🛍️ Shopping","🔥 Adventures & activities","🚗 Transportation"],
+    Emergency:["🏨 A place to stay","🚗 Transportation","📍 Directions","🆘 Emergency help","💊 Nearby essential services","❓ Help me decide"]
+  };
+
+  const experienceChoices={
+    Business:["🤫 Quiet & focused","📍 Close to where I need to be","🚗 Easy transportation","🍽️ Good business dining","🛏️ Comfortable & convenient"],
+    Family:["👨‍👩‍👧 Family-friendly","🕊️ Quiet & comfortable","🏊 Fun for the kids","🎢 Close to attractions","🍳 Easy meals & amenities"],
+    Leisure:["🌴 Relaxed","🎟️ Lots to do","🍽️ Food & nightlife","🔥 Daring & adventurous","✨ A little luxury"],
+    Emergency:["🛟 Practical & immediate","📍 Closest useful option","💰 Keep it affordable","❓ You choose for me"]
+  };
+
+  const card=(kicker,title,body,html)=>\`
+    <section class="journey-card">
+      <div class="journey-logo">🏨</div>
+      <span class="badge">\${kicker}</span>
+      <h1>\${title}</h1>
+      <p class="journey-lead">\${body}</p>
+      \${html}
+      <p class="journey-ai">Hotel Easy Pass uses your answers to decide what matters next. You won't be shown irrelevant choices.</p>
+    </section>\`;
+
+  let html="";
+  if(step==="mode"){
+    html=card("START HERE","How would you like to tell us about your trip?","Choose whichever feels easiest. You can change the way you answer later.",\`
+      <div class="choice-grid">
+        <button onclick="setInputMode('voice')">🎙️ <strong>Talk Out Loud</strong><small>Tell us naturally and we'll listen.</small></button>
+        <button onclick="setInputMode('text')">⌨️ <strong>Type & Click</strong><small>Type your answers and choose what fits.</small></button>
+      </div>\`);
+  } else if(step==="trip"){
+    html=card("NICE TO MEET YOU, "+esc(t.name.toUpperCase()),"Where are you traveling?","Tell us where you're headed. Then we'll ask only what helps.",\`
+      <input id="destination" class="journey-input" placeholder="City, state or destination" value="\${esc(t.destination)}">
+      <div class="voice-row"><button class="secondary" onclick="speakAnswer('destination')">🎙️ Speak destination</button></div>
+      <div class="choice-grid">
+        <button onclick="chooseTrip('Business')">💼 <strong>Business</strong><small>Work, meetings or events</small></button>
+        <button onclick="chooseTrip('Emergency')">🚨 <strong>Emergency</strong><small>I need help right now</small></button>
+        <button onclick="chooseTrip('Leisure')">🌴 <strong>Leisure</strong><small>Vacation, fun or exploring</small></button>
+        <button onclick="chooseTrip('Family')">👨‍👩‍👧 <strong>Family</strong><small>Traveling with family</small></button>
+      </div>\`);
+  } else if(step==="travelers"){
+    html=card(t.tripType.toUpperCase()+" TRIP","Who's traveling?","We'll use this only to keep recommendations relevant.",\`
+      <div class="number-row"><button onclick="adjustTravelers(-1)">−</button><strong id="travelerCount">\${t.travelers}</strong><button onclick="adjustTravelers(1)">+</button></div>
+      <button class="primary journey-button" onclick="nextJourney('days')">Continue →</button>\`);
+  } else if(step==="days"){
+    html=card("TRIP LENGTH","How many days will you be staying?","A rough number is fine. You can change it later.",\`
+      <div class="number-row"><button onclick="adjustDays(-1)">−</button><strong id="dayCount">\${t.days}</strong><button onclick="adjustDays(1)">+</button></div>
+      <button class="primary journey-button" onclick="nextJourney('hotel')">Continue →</button>\`);
+  } else if(step==="hotel"){
+    html=card("STAY","Do you already have a hotel?","We'll only help with a hotel if you need one.",\`
+      <div class="choice-grid"><button onclick="setJourneyChoice('hotel','have')">🏨 <strong>I have one</strong></button><button onclick="setJourneyChoice('hotel','need')">🔎 <strong>I need one</strong></button></div>\`);
+  } else if(step==="rental"){
+    html=card("TRANSPORTATION","Do you need a rental car?","We'll keep transportation recommendations relevant to your trip.",\`
+      <div class="choice-grid"><button onclick="setJourneyChoice('rental','have')">🚗 <strong>I have one</strong></button><button onclick="setJourneyChoice('rental','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('rental','no')">🚶 <strong>No rental needed</strong></button><button onclick="setJourneyChoice('rental','undecided')">❓ <strong>Not sure yet</strong></button></div>\`);
+  } else if(step==="flight"){
+    html=card("FLIGHT","What about your flight?","We'll keep flight planning separate from your reservation details.",\`
+      <div class="choice-grid"><button onclick="setJourneyChoice('flight','have')">✈️ <strong>I have one</strong></button><button onclick="setJourneyChoice('flight','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('flight','no')">🚗 <strong>No flight needed</strong></button><button onclick="setJourneyChoice('flight','undecided')">❓ <strong>Not sure yet</strong></button></div>\`);
+  } else if(step==="needs"){
+    html=card("ONE MORE THING","Any certain needs or wants during your trip?","We'll use your answer to decide what to ask next.",\`
+      <div class="choice-grid">
+        <button onclick="setNeedsMode('yes')">✅ <strong>Yes, I need...</strong><small>Tell us what would make this trip easier.</small></button>
+        <button onclick="setNeedsMode('no')">👍 <strong>No, I got this...</strong><small>I'll handle the details myself.</small></button>
+        <button onclick="setNeedsMode('help')" class="wide-choice">❓ <strong>I have no clue, help me choose</strong><small>We'll figure out what fits your trip.</small></button>
+      </div>\`);
+  } else if(step==="needChoice"){
+    const choices=needChoices[t.tripType]||needChoices.Leisure;
+    html=card("TELL US WHAT YOU NEED","What do you need?","These choices are based on your trip, not a generic travel menu.",\`
+      <div class="choice-grid">\${choices.map((x,i)=>\`<button onclick="chooseNeed(\${i})">\${x}</button>\`).join("")}<button onclick="chooseNeed(-1)">➕ <strong>Something else</strong></button></div>\`);
+  } else if(step==="experience"){
+    const choices=experienceChoices[t.tripType]||experienceChoices.Leisure;
+    html=card("YOUR EXPERIENCE","What would make this trip feel right?","Pick what matters most. You can choose more than one later if it makes sense.",\`
+      <div class="choice-grid">\${choices.map((x,i)=>\`<button onclick="chooseExperience(\${i})">\${x}</button>\`).join("")}<button onclick="chooseExperience(-1)">❓ <strong>Help me choose</strong></button></div>\`);
+  } else if(step==="help"){
+    const choices=experienceChoices[t.tripType]||experienceChoices.Leisure;
+    html=card("LET US HELP","A couple of quick choices will help us figure it out.","You don't need to know the travel answer. Just tell us what sounds better.",\`
+      <p class="journey-question">Would you rather have...</p>
+      <div class="choice-grid">\${choices.slice(0,4).map((x,i)=>\`<button onclick="chooseExperience(\${i})">\${x}</button>\`).join("")}</div>
+      <button class="secondary journey-button" onclick="chooseExperience(-1)">❓ You choose for me</button>\`);
+  } else if(step==="done"){
+    html=card("YOUR TRIP PROFILE","We've got the basics.","Hotel Easy Pass will keep your trip focused on the things you actually told us you want.",\`
+      <div class="profile-summary">\${tripProfileHtml()}</div>
+      <button class="primary journey-button" onclick="finishOnboarding()">Build My Trip →</button>
+      <button class="secondary journey-button" onclick="renderJourneyStep('needs')">Change an answer</button>\`);
+  }
+  document.getElementById("app").innerHTML=html;
   if(step==="trip") document.getElementById("destination")?.focus();
+  if(step==="mode" && t.inputMode==="voice") startVoiceCapture();
+}
+
+function setInputMode(mode){
+  state.traveler.inputMode=mode;
+  state.traveler.onboardingStep="trip";
+  persist();
+  renderJourneyStep("trip");
 }
 
 function chooseTrip(type){
   const d=document.getElementById("destination")?.value.trim();
   if(!d){document.getElementById("destination")?.focus();return;}
-  state.traveler.destination=d; state.traveler.tripType=type; persist(); renderJourneyStep("travelers");
+  state.traveler.destination=d;
+  state.traveler.tripType=type;
+  state.traveler.onboardingStep="travelers";
+  persist();
+  renderJourneyStep("travelers");
 }
+
 function adjustTravelers(delta){state.traveler.travelers=Math.max(1,Math.min(20,state.traveler.travelers+delta));const el=document.getElementById("travelerCount");if(el)el.textContent=state.traveler.travelers;persist();}
 function adjustDays(delta){state.traveler.days=Math.max(1,Math.min(90,state.traveler.days+delta));const el=document.getElementById("dayCount");if(el)el.textContent=state.traveler.days;persist();}
-function nextJourney(step){persist();renderJourneyStep(step);}
-function setJourneyChoice(key,value){state.traveler[key]=value;persist();
-  const order={hotel:"rental",rental:"flight",flight:"done"}; const next=order[key];
-  if(next==="done") renderDashboard(); else renderJourneyStep(next);
+function nextJourney(step){state.traveler.onboardingStep=step;persist();renderJourneyStep(step);}
+
+function setJourneyChoice(key,value){
+  state.traveler[key]=value;
+  persist();
+  const order={hotel:"rental",rental:"flight",flight:"needs"};
+  const next=order[key];
+  if(next==="needs") renderJourneyStep("needs"); else renderJourneyStep(next);
+}
+
+function setNeedsMode(mode){
+  state.traveler.needsMode=mode;
+  if(mode==="yes"){state.traveler.onboardingStep="needChoice";renderJourneyStep("needChoice");return;}
+  if(mode==="help"){state.traveler.onboardingStep="help";renderJourneyStep("help");return;}
+  state.traveler.needs=[];
+  state.traveler.onboardingStep="experience";
+  renderJourneyStep("experience");
+}
+
+function chooseNeed(index){
+  const labels={
+    Business:["work-friendly hotel","hotel near the meeting","transportation","parking","business dining","quiet place to work"],
+    Family:["family-friendly hotel","kid-friendly amenities","breakfast","kid activities","groceries","transportation"],
+    Leisure:["hotel","restaurants","attractions and events","shopping","adventures and activities","transportation"],
+    Emergency:["place to stay","transportation","directions","emergency help","nearby essential services","help deciding"]
+  };
+  const list=labels[state.traveler.tripType]||labels.Leisure;
+  if(index>=0) state.traveler.needs=[list[index]];
+  else state.traveler.needs=["something else"];
+  state.traveler.onboardingStep="experience";
+  persist();
+  renderJourneyStep("experience");
+}
+
+function chooseExperience(index){
+  const labels={
+    Business:["quiet and focused","close to where I need to be","easy transportation","good business dining","comfortable and convenient"],
+    Family:["family-friendly","quiet and comfortable","fun for the kids","close to attractions","easy meals and amenities"],
+    Leisure:["relaxed","lots to do","food and nightlife","daring and adventurous","a little luxury"],
+    Emergency:["practical and immediate","closest useful option","affordable","you choose for me"]
+  };
+  const list=labels[state.traveler.tripType]||labels.Leisure;
+  state.traveler.experience=index>=0?list[index]:"help me choose";
+  state.traveler.onboardingStep="done";
+  persist();
+  renderJourneyStep("done");
+}
+
+function tripProfileHtml(){
+  const t=state.traveler;
+  return \`
+    <div class="profile-chip-row">
+      <span>📍 \${esc(t.destination)}</span><span>\${esc(t.tripType)}</span><span>👥 \${t.travelers}</span><span>📅 \${t.days} day\${t.days===1?"":"s"}</span>
+    </div>
+    <p><strong>Hotel:</strong> \${esc(t.hotel==="need"?"Need help finding one":"Already have one")}</p>
+    <p><strong>Rental:</strong> \${esc(t.rental==="need"?"Need one":t.rental==="have"?"Already have one":t.rental==="no"?"No rental needed":"Not sure yet")}</p>
+    <p><strong>Flight:</strong> \${esc(t.flight==="need"?"Need help finding one":t.flight==="have"?"Already have one":t.flight==="no"?"No flight needed":"Not sure yet")}</p>
+    <p><strong>Needs:</strong> \${esc((t.needs&&t.needs.length)?t.needs.join(", "):"None specified")}</p>
+    <p><strong>Experience:</strong> \${esc(t.experience||"We'll help choose")}</p>\`;
+}
+
+function finishOnboarding(){
+  state.traveler.onboardingComplete=true;
+  state.traveler.onboardingStep="done";
+  persist();
+  renderDashboard();
+}
+
+function resetTravelerJourney(){
+  state.traveler={
+    name:state.traveler.name||"",
+    destination:"",
+    tripType:"",
+    travelers:1,
+    days:1,
+    hotel:"need",
+    rental:"undecided",
+    flight:"undecided",
+    needs:[],
+    needsMode:"",
+    experience:"",
+    inputMode:"",
+    onboardingStep:"mode",
+    onboardingComplete:false
+  };
+  persist();
+  render();
+}
+
+let voiceRecognition=null;
+function getSpeechRecognition(){
+  const C=window.SpeechRecognition||window.webkitSpeechRecognition;
+  return C||null;
+}
+function startVoiceCapture(){
+  const C=getSpeechRecognition();
+  const box=document.getElementById("app");
+  if(!C){
+    const note=document.createElement("p");
+    note.className="journey-note";
+    note.textContent="Voice input isn't available in this browser. Type & Click is ready to use instead.";
+    box.querySelector(".journey-card")?.appendChild(note);
+    return;
+  }
+  const destination=document.getElementById("destination");
+  if(!destination)return;
+  const button=document.createElement("button");
+  button.className="secondary journey-button";
+  button.textContent="🎙️ Tap to speak";
+  button.onclick=()=>speakAnswer("destination");
+  destination.insertAdjacentElement("afterend",button);
+}
+function speakAnswer(fieldId){
+  const C=getSpeechRecognition();
+  if(!C){alert("Voice input isn't available in this browser. Please use Type & Click.");return;}
+  if(voiceRecognition){try{voiceRecognition.stop();}catch(_){}}
+  voiceRecognition=new C();
+  voiceRecognition.lang="en-US";
+  voiceRecognition.interimResults=false;
+  voiceRecognition.maxAlternatives=1;
+  const field=document.getElementById(fieldId);
+  const button=event?.currentTarget;
+  if(button){button.textContent="🎙️ Listening...";button.disabled=true;}
+  voiceRecognition.onresult=e=>{
+    const text=e.results?.[0]?.[0]?.transcript?.trim()||"";
+    if(field){field.value=text;}
+  };
+  voiceRecognition.onerror=()=>{
+    if(button){button.textContent="🎙️ Speak destination";button.disabled=false;}
+  };
+  voiceRecognition.onend=()=>{
+    if(button){button.textContent="🎙️ Speak destination";button.disabled=false;}
+  };
+  try{voiceRecognition.start();}catch(_){}
 }
 
 function renderDashboard() {
