@@ -3,6 +3,7 @@ let deferredInstallPrompt = null;
 
 const state = {
   hotel: JSON.parse(localStorage.getItem("hep_hotel") || "null") || { name: "", address: "", checkIn: "", checkOut: "", room: "" },
+  traveler: JSON.parse(localStorage.getItem("hep_traveler") || "null") || { name: "", destination: "", tripType: "", travelers: 1, days: 1, hotel: "need", rental: "undecided", flight: "undecided", needs: [] },
   rewards: JSON.parse(localStorage.getItem("hep_rewards") || "[]"),
   notes: JSON.parse(localStorage.getItem("hep_notes") || "[]"),
   checklist: JSON.parse(localStorage.getItem("hep_checklist") || "[]"),
@@ -31,6 +32,7 @@ const defaultPacking = ["ID / wallet", "Phone + charger", "Medications", "Toilet
 
 function persist() {
   localStorage.setItem("hep_hotel", JSON.stringify(state.hotel));
+  localStorage.setItem("hep_traveler", JSON.stringify(state.traveler));
   localStorage.setItem("hep_rewards", JSON.stringify(state.rewards));
   localStorage.setItem("hep_notes", JSON.stringify(state.notes));
   localStorage.setItem("hep_checklist", JSON.stringify(state.checklist));
@@ -51,7 +53,92 @@ function money(value) {
   return Number(value || 0).toLocaleString(undefined, { style: "currency", currency: "USD" });
 }
 
-function render() {
+function render(){
+  if(!state.traveler.name){
+    document.getElementById("app").innerHTML=`
+      <section class="journey-card">
+        <div class="journey-logo">🏨</div>
+        <span class="badge">HOTEL EASY PASS</span>
+        <h1>Welcome! 👋</h1>
+        <p class="journey-lead">Before we get started, what should we call you?</p>
+        <label class="journey-label" for="travelerName">First name or nickname</label>
+        <input id="travelerName" class="journey-input" autocomplete="given-name" placeholder="What should we call you?">
+        <p class="journey-note">Don't worry. This isn't the name that will be used for your hotel, flight, or other reservations. We'll ask for that information when it's needed.</p>
+        <button class="primary journey-button" onclick="beginJourney()">Let's Get Started →</button>
+      </section>`;
+    return;
+  }
+  renderDashboard();
+}
+
+function beginJourney(){
+  const input=document.getElementById("travelerName");
+  const name=(input?.value||"").trim();
+  if(!name){ input?.focus(); return; }
+  state.traveler.name=name;
+  persist();
+  renderJourneyStep("trip");
+}
+
+function renderJourneyStep(step){
+  const t=state.traveler;
+  const content={
+    trip:{
+      kicker:"NICE TO MEET YOU, "+esc(t.name.toUpperCase()),
+      title:"Where are you traveling?",
+      body:"Tell us where you're headed. We'll keep the rest of the trip focused on what matters to you.",
+      html:`<input id="destination" class="journey-input" placeholder="City, state or destination" value="${esc(t.destination)}"><div class="choice-grid"><button onclick="chooseTrip('Business')">💼 Business</button><button onclick="chooseTrip('Emergency')">🚨 Emergency</button><button onclick="chooseTrip('Leisure')">🌴 Leisure</button><button onclick="chooseTrip('Family')">👨‍👩‍👧 Family</button></div>`
+    },
+    travelers:{
+      kicker:t.tripType.toUpperCase()+" TRIP",
+      title:"Who's traveling?",
+      body:"We'll use this to keep recommendations relevant.",
+      html:`<div class="number-row"><button onclick="adjustTravelers(-1)">−</button><strong id="travelerCount">${t.travelers}</strong><button onclick="adjustTravelers(1)">+</button></div><button class="primary journey-button" onclick="nextJourney('days')">Continue →</button>`
+    },
+    days:{
+      kicker:"TRIP LENGTH",
+      title:"How many days will you be staying?",
+      body:"A rough number is fine. You can change it later.",
+      html:`<div class="number-row"><button onclick="adjustDays(-1)">−</button><strong id="dayCount">${t.days}</strong><button onclick="adjustDays(1)">+</button></div><button class="primary journey-button" onclick="nextJourney('hotel')">Continue →</button>`
+    },
+    hotel:{
+      kicker:"STAY",
+      title:"Do you already have a hotel?",
+      body:"We'll focus hotel suggestions around your trip type and preferences.",
+      html:`<div class="choice-grid"><button onclick="setJourneyChoice('hotel','have')">🏨 I have one</button><button onclick="setJourneyChoice('hotel','need')">🔎 I need one</button></div>`
+    },
+    rental:{
+      kicker:"TRANSPORTATION",
+      title:"Do you need a rental car?",
+      body:"No problem if you're not sure yet.",
+      html:`<div class="choice-grid"><button onclick="setJourneyChoice('rental','have')">🚗 I have one</button><button onclick="setJourneyChoice('rental','need')">🔎 I need one</button><button onclick="setJourneyChoice('rental','no')">No rental needed</button><button onclick="setJourneyChoice('rental','undecided')">Not sure yet</button></div>`
+    },
+    flight:{
+      kicker:"FLIGHT",
+      title:"What about your flight?",
+      body:"We'll keep flight planning separate from your reservation details.",
+      html:`<div class="choice-grid"><button onclick="setJourneyChoice('flight','have')">✈️ I have one</button><button onclick="setJourneyChoice('flight','need')">🔎 I need one</button><button onclick="setJourneyChoice('flight','no')">No flight needed</button><button onclick="setJourneyChoice('flight','undecided')">Not sure yet</button></div>`
+    }
+  };
+  const s=content[step];
+  document.getElementById("app").innerHTML=`<section class="journey-card"><div class="journey-logo">🏨</div><span class="badge">${s.kicker}</span><h1>${s.title}</h1><p class="journey-lead">${s.body}</p>${s.html}<p class="journey-ai">Your trip will stay focused. Hotel Easy Pass uses your answers to surface the most relevant tools and recommendations.</p></section>`;
+  if(step==="trip") document.getElementById("destination")?.focus();
+}
+
+function chooseTrip(type){
+  const d=document.getElementById("destination")?.value.trim();
+  if(!d){document.getElementById("destination")?.focus();return;}
+  state.traveler.destination=d; state.traveler.tripType=type; persist(); renderJourneyStep("travelers");
+}
+function adjustTravelers(delta){state.traveler.travelers=Math.max(1,Math.min(20,state.traveler.travelers+delta));const el=document.getElementById("travelerCount");if(el)el.textContent=state.traveler.travelers;persist();}
+function adjustDays(delta){state.traveler.days=Math.max(1,Math.min(90,state.traveler.days+delta));const el=document.getElementById("dayCount");if(el)el.textContent=state.traveler.days;persist();}
+function nextJourney(step){persist();renderJourneyStep(step);}
+function setJourneyChoice(key,value){state.traveler[key]=value;persist();
+  const order={hotel:"rental",rental:"flight",flight:"done"}; const next=order[key];
+  if(next==="done") renderDashboard(); else renderJourneyStep(next);
+}
+
+function renderDashboard() {
   trackEvent("app_open");
   const checklist = state.checklist.length ? state.checklist : defaultChecklist.map(text => ({ text, done: false }));
   const packing = state.packing.length ? state.packing : defaultPacking.map(text => ({ text, done: false }));
