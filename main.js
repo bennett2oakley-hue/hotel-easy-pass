@@ -157,7 +157,7 @@ function renderJourneyStep(step){
   } else if(step==="trip"){
     html=card("NICE TO MEET YOU, "+esc(t.name.toUpperCase()),"Where are you traveling?","Tell us where you're headed. Then we'll ask only what helps.",\`
       <input id="destination" class="journey-input" placeholder="City, state or destination" value="\${esc(t.destination)}">
-      <div class="voice-row"><button class="secondary" onclick="speakAnswer('destination')">🎙️ Speak destination</button></div>
+      <div class="voice-row"><button class="secondary" onclick="speakDestination(this)">🎙️ Speak destination</button></div>
       <div class="choice-grid">
         <button onclick="chooseTrip('Business')">💼 <strong>Business</strong><small>Work, meetings or events</small></button>
         <button onclick="chooseTrip('Emergency')">🚨 <strong>Emergency</strong><small>I need help right now</small></button>
@@ -247,8 +247,9 @@ function setNeedsMode(mode){
   if(mode==="yes"){state.traveler.onboardingStep="needChoice";renderJourneyStep("needChoice");return;}
   if(mode==="help"){state.traveler.onboardingStep="help";renderJourneyStep("help");return;}
   state.traveler.needs=[];
-  state.traveler.onboardingStep="experience";
-  renderJourneyStep("experience");
+  state.traveler.experience="I got this";
+  state.traveler.onboardingStep="done";
+  renderJourneyStep("done");
 }
 
 function chooseNeed(index){
@@ -323,49 +324,53 @@ function resetTravelerJourney(){
 
 let voiceRecognition=null;
 function getSpeechRecognition(){
-  const C=window.SpeechRecognition||window.webkitSpeechRecognition;
-  return C||null;
+  return window.SpeechRecognition||window.webkitSpeechRecognition||null;
 }
-function startVoiceCapture(){
-  const C=getSpeechRecognition();
-  const box=document.getElementById("app");
-  if(!C){
-    const note=document.createElement("p");
-    note.className="journey-note";
-    note.textContent="Voice input isn't available in this browser. Type & Click is ready to use instead.";
-    box.querySelector(".journey-card")?.appendChild(note);
-    return;
-  }
-  const destination=document.getElementById("destination");
-  if(!destination)return;
-  const button=document.createElement("button");
-  button.className="secondary journey-button";
-  button.textContent="🎙️ Tap to speak";
-  button.onclick=()=>speakAnswer("destination");
-  destination.insertAdjacentElement("afterend",button);
-}
-function speakAnswer(fieldId){
+function speakAnswer(fieldId, buttonEl){
   const C=getSpeechRecognition();
   if(!C){alert("Voice input isn't available in this browser. Please use Type & Click.");return;}
-  if(voiceRecognition){try{voiceRecognition.stop();}catch(_){}}
+  if(voiceRecognition){try{voiceRecognition.abort();}catch(_){}}
   voiceRecognition=new C();
   voiceRecognition.lang="en-US";
+  voiceRecognition.continuous=false;
   voiceRecognition.interimResults=false;
   voiceRecognition.maxAlternatives=1;
   const field=document.getElementById(fieldId);
-  const button=event?.currentTarget;
+  const button=buttonEl||null;
   if(button){button.textContent="🎙️ Listening...";button.disabled=true;}
   voiceRecognition.onresult=e=>{
     const text=e.results?.[0]?.[0]?.transcript?.trim()||"";
-    if(field){field.value=text;}
+    if(field) field.value=text;
+    if(field) field.dispatchEvent(new Event("input",{bubbles:true}));
   };
   voiceRecognition.onerror=()=>{
-    if(button){button.textContent="🎙️ Speak destination";button.disabled=false;}
+    if(button){button.textContent="🎙️ Speak";button.disabled=false;}
   };
   voiceRecognition.onend=()=>{
-    if(button){button.textContent="🎙️ Speak destination";button.disabled=false;}
+    if(button){button.textContent="🎙️ Speak";button.disabled=false;}
   };
-  try{voiceRecognition.start();}catch(_){}
+  try{voiceRecognition.start();}catch(_){
+    if(button){button.textContent="🎙️ Speak";button.disabled=false;}
+  }
+}
+function speakDestination(buttonEl){speakAnswer("destination",buttonEl);}
+
+
+function renderTripIntro(){
+  const t=state.traveler;
+  if(!t?.onboardingComplete) return "";
+  const needs=(t.needs&&t.needs.length)?t.needs.join(", "):"No specific needs";
+  return \`
+    <section class="trip-intro">
+      <div class="eyebrow">YOUR TRIP, YOUR WAY</div>
+      <h2>Hi \${esc(t.name)} 👋</h2>
+      <p><strong>\${esc(t.destination)}</strong> · \${esc(t.tripType)} · \${t.travelers} traveler\${t.travelers===1?"":"s"} · \${t.days} day\${t.days===1?"":"s"}</p>
+      <p>Needs: \${esc(needs)} · Experience: \${esc(t.experience||"We'll help choose")}</p>
+      <div class="trip-intro-actions">
+        <button onclick="renderJourneyStep('needs')">✏️ Change trip answers</button>
+        <button onclick="resetTravelerJourney()">🔄 Start a different trip</button>
+      </div>
+    </section>\`;
 }
 
 function renderDashboard() {
@@ -376,8 +381,10 @@ function renderDashboard() {
   if (!state.packing.length) state.packing = packing;
   persist();
 
+  const tripIntro=renderTripIntro();
   document.getElementById("app").innerHTML = `
     <div class="hep">
+      ${tripIntro}
       <header class="hero">
         <div class="logo" aria-hidden="true">🏨</div>
         <div>
@@ -1019,6 +1026,10 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 .packing-row{display:flex;gap:8px;align-items:center}.packing-row .check{flex:1}.packing-row .delete{margin-bottom:1px}
 .essential-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.emergency{border:1px solid #f0d7d7}.call911{display:block;text-align:center;margin-top:14px;padding:12px;border-radius:12px;background:#f7e2e2;color:#8b2d2d;font-weight:900;text-decoration:none}
 .popular-searches{margin-top:14px;padding-top:12px;border-top:1px solid #e7eeee}.popular-searches strong{font-size:13px}footer a{color:#087f78;font-weight:700;text-decoration:none}footer{text-align:center;padding:30px 20px;color:#557070;font-size:14px}footer p{margin:5px 0}footer small{opacity:.75}
+.voice-row{display:flex;gap:8px;margin-top:9px}.voice-row button{flex:1}
+.choice-grid button{min-height:72px;text-align:left}.choice-grid button strong{display:block;font-size:15px}.choice-grid button small{display:block;margin-top:4px;color:#60706f;font-weight:500;line-height:1.35}.wide-choice{grid-column:1/-1}
+.journey-question{font-weight:850;color:#245b5a;margin-top:18px}.profile-summary{padding:15px;border-radius:16px;background:#f0faf8;border:1px solid #d8ece9}.profile-summary p{margin:8px 0;color:#47605f}.profile-chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}.profile-chip-row span{background:#d9efeb;color:#17615d;padding:6px 9px;border-radius:99px;font-size:11px;font-weight:800}
+.trip-intro{margin:15px;padding:20px;border-radius:20px;background:linear-gradient(135deg,#ffffff,#e8f7f4);border:1px solid #cfe8e3;box-shadow:0 5px 18px rgba(0,0,0,.07)}.trip-intro .eyebrow{color:#087f78}.trip-intro h2{margin:5px 0 8px}.trip-intro p{margin:0;color:#526565;line-height:1.5}.trip-intro-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.trip-intro-actions button{border:0;border-radius:11px;padding:10px 12px;font-weight:800;cursor:pointer;background:#e4f5f1;color:#087f78}
 @media(max-width:520px){.room-photo-log{grid-template-columns:1fr 1fr}.welcome{align-items:flex-start;flex-direction:column}.welcome .primary{width:100%}.form.two{grid-template-columns:1fr}.quick-grid{grid-template-columns:repeat(3,1fr)}.search-row{flex-direction:column}.button-row{flex-direction:column}}
 @media(max-width:380px){.quick-grid{grid-template-columns:repeat(2,1fr)}}
 `;
