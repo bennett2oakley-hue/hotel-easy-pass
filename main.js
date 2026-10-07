@@ -65,7 +65,7 @@ function render(){
 }
 
 function renderNameStep(){
-  document.getElementById("app").innerHTML=\`
+  document.getElementById("app").innerHTML=`
     <section class="journey-card">
       <div class="journey-logo">🏨</div>
       <span class="badge">HOTEL EASY PASS</span>
@@ -75,7 +75,7 @@ function renderNameStep(){
       <input id="travelerName" class="journey-input" autocomplete="given-name" placeholder="First name or nickname">
       <p class="journey-note">Don't worry. This isn't the name that will be used for your hotel, flight, or other reservations. We'll ask for that information when it's needed.</p>
       <button class="primary journey-button" onclick="beginJourney()">Let's Get Started →</button>
-    </section>\`;
+    </section>`;
   document.getElementById("travelerName")?.focus();
 }
 
@@ -137,76 +137,76 @@ function renderJourneyStep(step){
     Emergency:["🛟 Practical & immediate","📍 Closest useful option","💰 Keep it affordable","❓ You choose for me"]
   };
 
-  const card=(kicker,title,body,html)=>\`
+  const card=(kicker,title,body,html)=>`
     <section class="journey-card">
       <div class="journey-logo">🏨</div>
-      <span class="badge">\${kicker}</span>
-      <h1>\${title}</h1>
-      <p class="journey-lead">\${body}</p>
-      \${html}
+      <span class="badge">${kicker}</span>
+      <h1>${title}</h1>
+      <p class="journey-lead">${body}</p>
+      ${html}
       <p class="journey-ai">Hotel Easy Pass uses your answers to decide what matters next. You won't be shown irrelevant choices.</p>
-    </section>\`;
+    </section>`;
 
   let html="";
   if(step==="mode"){
-    html=card("START HERE","How would you like to tell us about your trip?","Choose whichever feels easiest. You can change the way you answer later.",\`
+    html=card("START HERE","How would you like to tell us about your trip?","Choose whichever feels easiest. You can change the way you answer later.",`
       <div class="choice-grid">
         <button onclick="setInputMode('voice')">🎙️ <strong>Talk Out Loud</strong><small>Tell us naturally and we'll listen.</small></button>
         <button onclick="setInputMode('text')">⌨️ <strong>Type & Click</strong><small>Type your answers and choose what fits.</small></button>
-      </div>\`);
+      </div>`);
   } else if(step==="trip"){
-    html=card("NICE TO MEET YOU, "+esc(t.name.toUpperCase()),"Where are you traveling?","Tell us where you're headed. Then we'll ask only what helps.",\`
-      <input id="destination" class="journey-input" placeholder="City, state or destination" value="\${esc(t.destination)}">
+    html=card("NICE TO MEET YOU, "+esc(t.name.toUpperCase()),"Where are you traveling?","Tell us where you're headed. Then we'll ask only what helps.",`
+      <input id="destination" class="journey-input" placeholder="City, state or destination" value="${esc(t.destination)}">
       <div class="voice-row"><button class="secondary" onclick="speakDestination(this)">🎙️ Speak destination</button></div>
       <div class="choice-grid">
         <button onclick="chooseTrip('Business')">💼 <strong>Business</strong><small>Work, meetings or events</small></button>
         <button onclick="chooseTrip('Emergency')">🚨 <strong>Emergency</strong><small>I need help right now</small></button>
         <button onclick="chooseTrip('Leisure')">🌴 <strong>Leisure</strong><small>Vacation, fun or exploring</small></button>
         <button onclick="chooseTrip('Family')">👨‍👩‍👧 <strong>Family</strong><small>Traveling with family</small></button>
-      </div>\`);
+      </div>`);
   } else if(step==="travelers"){
-    html=card(t.tripType.toUpperCase()+" TRIP","Who's traveling?","We'll use this only to keep recommendations relevant.",\`
-      <div class="number-row"><button onclick="adjustTravelers(-1)">−</button><strong id="travelerCount">\${t.travelers}</strong><button onclick="adjustTravelers(1)">+</button></div>
-      <button class="primary journey-button" onclick="nextJourney('days')">Continue →</button>\`);
+    html=card(t.tripType.toUpperCase()+" TRIP","Who's traveling?","We'll use this only to keep recommendations relevant.",`
+      <div class="number-row"><button onclick="adjustTravelers(-1)">−</button><strong id="travelerCount">${t.travelers}</strong><button onclick="adjustTravelers(1)">+</button></div>
+      <button class="primary journey-button" onclick="nextJourney('days')">Continue →</button>`);
   } else if(step==="days"){
-    html=card("TRIP LENGTH","How many days will you be staying?","A rough number is fine. You can change it later.",\`
-      <div class="number-row"><button onclick="adjustDays(-1)">−</button><strong id="dayCount">\${t.days}</strong><button onclick="adjustDays(1)">+</button></div>
-      <button class="primary journey-button" onclick="nextJourney('hotel')">Continue →</button>\`);
+    html=card("TRIP LENGTH","How many days will you be staying?","A rough number is fine. You can change it later.",`
+      <div class="number-row"><button onclick="adjustDays(-1)">−</button><strong id="dayCount">${t.days}</strong><button onclick="adjustDays(1)">+</button></div>
+      <button class="primary journey-button" onclick="nextJourney('hotel')">Continue →</button>`);
   } else if(step==="hotel"){
-    html=card("STAY","Do you already have a hotel?","We'll only help with a hotel if you need one.",\`
-      <div class="choice-grid"><button onclick="setJourneyChoice('hotel','have')">🏨 <strong>I have one</strong></button><button onclick="setJourneyChoice('hotel','need')">🔎 <strong>I need one</strong></button></div>\`);
+    html=card("STAY","Do you already have a hotel?","We'll only help with a hotel if you need one.",`
+      <div class="choice-grid"><button onclick="setJourneyChoice('hotel','have')">🏨 <strong>I have one</strong></button><button onclick="setJourneyChoice('hotel','need')">🔎 <strong>I need one</strong></button></div>`);
   } else if(step==="rental"){
-    html=card("TRANSPORTATION","Do you need a rental car?","We'll keep transportation recommendations relevant to your trip.",\`
-      <div class="choice-grid"><button onclick="setJourneyChoice('rental','have')">🚗 <strong>I have one</strong></button><button onclick="setJourneyChoice('rental','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('rental','no')">🚶 <strong>No rental needed</strong></button><button onclick="setJourneyChoice('rental','undecided')">❓ <strong>Not sure yet</strong></button></div>\`);
+    html=card("TRANSPORTATION","Do you need a rental car?","We'll keep transportation recommendations relevant to your trip.",`
+      <div class="choice-grid"><button onclick="setJourneyChoice('rental','have')">🚗 <strong>I have one</strong></button><button onclick="setJourneyChoice('rental','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('rental','no')">🚶 <strong>No rental needed</strong></button><button onclick="setJourneyChoice('rental','undecided')">❓ <strong>Not sure yet</strong></button></div>`);
   } else if(step==="flight"){
-    html=card("FLIGHT","What about your flight?","We'll keep flight planning separate from your reservation details.",\`
-      <div class="choice-grid"><button onclick="setJourneyChoice('flight','have')">✈️ <strong>I have one</strong></button><button onclick="setJourneyChoice('flight','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('flight','no')">🚗 <strong>No flight needed</strong></button><button onclick="setJourneyChoice('flight','undecided')">❓ <strong>Not sure yet</strong></button></div>\`);
+    html=card("FLIGHT","What about your flight?","We'll keep flight planning separate from your reservation details.",`
+      <div class="choice-grid"><button onclick="setJourneyChoice('flight','have')">✈️ <strong>I have one</strong></button><button onclick="setJourneyChoice('flight','need')">🔎 <strong>I need one</strong></button><button onclick="setJourneyChoice('flight','no')">🚗 <strong>No flight needed</strong></button><button onclick="setJourneyChoice('flight','undecided')">❓ <strong>Not sure yet</strong></button></div>`);
   } else if(step==="needs"){
-    html=card("ONE MORE THING","Any certain needs or wants during your trip?","We'll use your answer to decide what to ask next.",\`
+    html=card("ONE MORE THING","Any certain needs or wants during your trip?","We'll use your answer to decide what to ask next.",`
       <div class="choice-grid">
         <button onclick="setNeedsMode('yes')">✅ <strong>Yes, I need...</strong><small>Tell us what would make this trip easier.</small></button>
         <button onclick="setNeedsMode('no')">👍 <strong>No, I got this...</strong><small>I'll handle the details myself.</small></button>
         <button onclick="setNeedsMode('help')" class="wide-choice">❓ <strong>I have no clue, help me choose</strong><small>We'll figure out what fits your trip.</small></button>
-      </div>\`);
+      </div>`);
   } else if(step==="needChoice"){
     const choices=needChoices[t.tripType]||needChoices.Leisure;
-    html=card("TELL US WHAT YOU NEED","What do you need?","These choices are based on your trip, not a generic travel menu.",\`
-      <div class="choice-grid">\${choices.map((x,i)=>\`<button onclick="chooseNeed(\${i})">\${x}</button>\`).join("")}<button onclick="chooseNeed(-1)">➕ <strong>Something else</strong></button></div>\`);
+    html=card("TELL US WHAT YOU NEED","What do you need?","These choices are based on your trip, not a generic travel menu.",`
+      <div class="choice-grid">${choices.map((x,i)=>`<button onclick="chooseNeed(${i})">${x}</button>`).join("")}<button onclick="chooseNeed(-1)">➕ <strong>Something else</strong></button></div>`);
   } else if(step==="experience"){
     const choices=experienceChoices[t.tripType]||experienceChoices.Leisure;
-    html=card("YOUR EXPERIENCE","What would make this trip feel right?","Pick what matters most. You can choose more than one later if it makes sense.",\`
-      <div class="choice-grid">\${choices.map((x,i)=>\`<button onclick="chooseExperience(\${i})">\${x}</button>\`).join("")}<button onclick="chooseExperience(-1)">❓ <strong>Help me choose</strong></button></div>\`);
+    html=card("YOUR EXPERIENCE","What would make this trip feel right?","Pick what matters most. You can choose more than one later if it makes sense.",`
+      <div class="choice-grid">${choices.map((x,i)=>`<button onclick="chooseExperience(${i})">${x}</button>`).join("")}<button onclick="chooseExperience(-1)">❓ <strong>Help me choose</strong></button></div>`);
   } else if(step==="help"){
     const choices=experienceChoices[t.tripType]||experienceChoices.Leisure;
-    html=card("LET US HELP","A couple of quick choices will help us figure it out.","You don't need to know the travel answer. Just tell us what sounds better.",\`
+    html=card("LET US HELP","A couple of quick choices will help us figure it out.","You don't need to know the travel answer. Just tell us what sounds better.",`
       <p class="journey-question">Would you rather have...</p>
-      <div class="choice-grid">\${choices.slice(0,4).map((x,i)=>\`<button onclick="chooseExperience(\${i})">\${x}</button>\`).join("")}</div>
-      <button class="secondary journey-button" onclick="chooseExperience(-1)">❓ You choose for me</button>\`);
+      <div class="choice-grid">${choices.slice(0,4).map((x,i)=>`<button onclick="chooseExperience(${i})">${x}</button>`).join("")}</div>
+      <button class="secondary journey-button" onclick="chooseExperience(-1)">❓ You choose for me</button>`);
   } else if(step==="done"){
-    html=card("YOUR TRIP PROFILE","We've got the basics.","Hotel Easy Pass will keep your trip focused on the things you actually told us you want.",\`
-      <div class="profile-summary">\${tripProfileHtml()}</div>
+    html=card("YOUR TRIP PROFILE","We've got the basics.","Hotel Easy Pass will keep your trip focused on the things you actually told us you want.",`
+      <div class="profile-summary">${tripProfileHtml()}</div>
       <button class="primary journey-button" onclick="finishOnboarding()">Build My Trip →</button>
-      <button class="secondary journey-button" onclick="renderJourneyStep('needs')">Change an answer</button>\`);
+      <button class="secondary journey-button" onclick="renderJourneyStep('needs')">Change an answer</button>`);
   }
   document.getElementById("app").innerHTML=html;
   if(step==="trip") document.getElementById("destination")?.focus();
@@ -283,15 +283,15 @@ function chooseExperience(index){
 
 function tripProfileHtml(){
   const t=state.traveler;
-  return \`
+  return `
     <div class="profile-chip-row">
-      <span>📍 \${esc(t.destination)}</span><span>\${esc(t.tripType)}</span><span>👥 \${t.travelers}</span><span>📅 \${t.days} day\${t.days===1?"":"s"}</span>
+      <span>📍 ${esc(t.destination)}</span><span>${esc(t.tripType)}</span><span>👥 ${t.travelers}</span><span>📅 ${t.days} day${t.days===1?"":"s"}</span>
     </div>
-    <p><strong>Hotel:</strong> \${esc(t.hotel==="need"?"Need help finding one":"Already have one")}</p>
-    <p><strong>Rental:</strong> \${esc(t.rental==="need"?"Need one":t.rental==="have"?"Already have one":t.rental==="no"?"No rental needed":"Not sure yet")}</p>
-    <p><strong>Flight:</strong> \${esc(t.flight==="need"?"Need help finding one":t.flight==="have"?"Already have one":t.flight==="no"?"No flight needed":"Not sure yet")}</p>
-    <p><strong>Needs:</strong> \${esc((t.needs&&t.needs.length)?t.needs.join(", "):"None specified")}</p>
-    <p><strong>Experience:</strong> \${esc(t.experience||"We'll help choose")}</p>\`;
+    <p><strong>Hotel:</strong> ${esc(t.hotel==="need"?"Need help finding one":"Already have one")}</p>
+    <p><strong>Rental:</strong> ${esc(t.rental==="need"?"Need one":t.rental==="have"?"Already have one":t.rental==="no"?"No rental needed":"Not sure yet")}</p>
+    <p><strong>Flight:</strong> ${esc(t.flight==="need"?"Need help finding one":t.flight==="have"?"Already have one":t.flight==="no"?"No flight needed":"Not sure yet")}</p>
+    <p><strong>Needs:</strong> ${esc((t.needs&&t.needs.length)?t.needs.join(", "):"None specified")}</p>
+    <p><strong>Experience:</strong> ${esc(t.experience||"We'll help choose")}</p>`;
 }
 
 function finishOnboarding(){
@@ -360,17 +360,17 @@ function renderTripIntro(){
   const t=state.traveler;
   if(!t?.onboardingComplete) return "";
   const needs=(t.needs&&t.needs.length)?t.needs.join(", "):"No specific needs";
-  return \`
+  return `
     <section class="trip-intro">
       <div class="eyebrow">YOUR TRIP, YOUR WAY</div>
-      <h2>Hi \${esc(t.name)} 👋</h2>
-      <p><strong>\${esc(t.destination)}</strong> · \${esc(t.tripType)} · \${t.travelers} traveler\${t.travelers===1?"":"s"} · \${t.days} day\${t.days===1?"":"s"}</p>
-      <p>Needs: \${esc(needs)} · Experience: \${esc(t.experience||"We'll help choose")}</p>
+      <h2>Hi ${esc(t.name)} 👋</h2>
+      <p><strong>${esc(t.destination)}</strong> · ${esc(t.tripType)} · ${t.travelers} traveler${t.travelers===1?"":"s"} · ${t.days} day${t.days===1?"":"s"}</p>
+      <p>Needs: ${esc(needs)} · Experience: ${esc(t.experience||"We'll help choose")}</p>
       <div class="trip-intro-actions">
         <button onclick="renderJourneyStep('needs')">✏️ Change trip answers</button>
         <button onclick="resetTravelerJourney()">🔄 Start a different trip</button>
       </div>
-    </section>\`;
+    </section>`;
 }
 
 function renderDashboard() {
