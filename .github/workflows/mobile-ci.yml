@@ -25,4 +25,5 @@ jobs:
           cache-dependency-path: mobile/package.json
       - run: npm install
       - run: npx expo config --type public
-      - run: npx expo export --platform web
+      - run: npx expo prebuild --no-install
+      - run: npx tsc --noEmit
