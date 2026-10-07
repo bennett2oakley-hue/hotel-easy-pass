@@ -1,0 +1,39 @@
+name: Validate Hotel Easy Pass
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Smoke tests
+        run: npm test
+      - name: JavaScript syntax check
+        run: |
+          node --check main.js
+          node --check server.js
+      - name: Verify app starts
+        run: |
+          node server.js > /tmp/hep-server.log 2>&1 &
+          PID=$!
+          trap "kill $PID" EXIT
+          sleep 1
+          curl --fail --silent http://127.0.0.1:10000/ > /tmp/hep-index.html
+          grep -q "Hotel Easy Pass" /tmp/hep-index.html
