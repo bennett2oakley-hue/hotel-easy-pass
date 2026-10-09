@@ -4,6 +4,14 @@
 
 Hotel Easy Pass is designed as a clean, low-friction travel utility rather than an ad-heavy hotel search portal. The current product is a static Progressive Web App that works from a browser and can be installed on supported devices.
 
+## Live demo and buyer handoff
+
+- Live demo: https://hotel-easy-pass.onrender.com/
+- Owner hub: https://hotel-easy-pass.onrender.com/owner.html
+- Local analytics dashboard: https://hotel-easy-pass.onrender.com/dashboard.html
+- Source repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
+- Buyer transfer and acceptance checklist: [BUYER_HANDOFF.md](BUYER_HANDOFF.md)
+
 ## Product
 
 ### Traveler experience
@@ -28,21 +36,15 @@ Hotel Easy Pass is designed as a clean, low-friction travel utility rather than 
 
 ## Product analytics
 
-Hotel Easy Pass includes privacy-conscious, browser-local product analytics. Lightweight events are stored locally under `hep_events`, capped at the latest 100 events. The dashboard at `dashboard.html` provides event counts, top features, recent activity and JSON export. No third-party analytics SDK or remote event collector is required by the current build.
-
-## Design approach
-
-The interface uses a mobile-first card system, high-contrast teal branding, large touch targets, simple navigation, responsive layouts and plain-language labels. The goal is to keep the core workflow understandable for a broad age range.
+Hotel Easy Pass includes browser-local product analytics. Lightweight events are stored locally under `hep_events`, capped at the latest 100 events. The dashboard at `dashboard.html` provides event counts, top features, recent activity and JSON export. No third-party analytics SDK or remote event collector is required by the current build.
 
 ## Technical architecture
 
 - Vanilla HTML, CSS and JavaScript
-- Progressive Web App manifest
-- Service worker
+- Progressive Web App manifest and service worker
 - Browser-local persistence for current user data
 - Browser-local product analytics
 - IndexedDB room-photo storage on supported browsers
-- No required application server
 - No required database
 - No framework build step
 
@@ -68,14 +70,10 @@ npm ci
 npm test
 ```
 
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for static hosting and [OPERATIONS.md](OPERATIONS.md) for release, rollback and container operations.
-
 ## Current product boundaries
 
-The current package does not include a hosted booking engine, payment processor, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Those are intentionally positioned as future expansion opportunities rather than represented as existing functionality.
+The current package does not include a hosted booking engine, payment processor, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Those are future expansion opportunities, not existing functionality. Data stored in a browser may not follow a user to another device and may be removed when browser data is cleared.
 
 ## Included package
 
-The project can be distributed as a clean ZIP through the included GitHub Actions packaging workflow. The package excludes the Git repository metadata and development-only clutter.
+The project can be distributed as a clean ZIP through the included GitHub Actions packaging workflow. The package excludes the Git repository metadata and development-only clutter. Review [BUYER_HANDOFF.md](BUYER_HANDOFF.md) before representing the asset to a buyer.
