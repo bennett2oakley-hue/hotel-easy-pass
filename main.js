@@ -1,13 +1,28 @@
 const APP_NAME = "Hotel Easy Pass";
 let deferredInstallPrompt = null;
 
+function readStoredJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : (JSON.parse(raw) ?? fallback);
+  } catch (error) {
+    console.warn("Hotel Easy Pass recovered invalid local data for " + key, error);
+    return fallback;
+  }
+}
+
+function readStoredArray(key) {
+  const value = readStoredJSON(key, []);
+  return Array.isArray(value) ? value : [];
+}
+
 const state = {
-  hotel: JSON.parse(localStorage.getItem("hep_hotel") || "null") || { name: "", address: "", checkIn: "", checkOut: "", room: "" },
-  traveler: JSON.parse(localStorage.getItem("hep_traveler") || "null") || { name: "", destination: "", tripType: "", travelers: 1, days: 1, hotel: "need", rental: "undecided", flight: "undecided", needs: [] },
-  rewards: JSON.parse(localStorage.getItem("hep_rewards") || "[]"),
-  notes: JSON.parse(localStorage.getItem("hep_notes") || "[]"),
-  checklist: JSON.parse(localStorage.getItem("hep_checklist") || "[]"),
-  packing: JSON.parse(localStorage.getItem("hep_packing") || "[]")
+  hotel: readStoredJSON("hep_hotel", null) || { name: "", address: "", checkIn: "", checkOut: "", room: "" },
+  traveler: readStoredJSON("hep_traveler", null) || { name: "", destination: "", tripType: "", travelers: 1, days: 1, hotel: "need", rental: "undecided", flight: "undecided", needs: [] },
+  rewards: readStoredArray("hep_rewards"),
+  notes: readStoredArray("hep_notes"),
+  checklist: readStoredArray("hep_checklist"),
+  packing: readStoredArray("hep_packing")
 };
 const PHOTO_DB = "hotel-easy-pass-photos";
 const PHOTO_STORE = "room_photos";
