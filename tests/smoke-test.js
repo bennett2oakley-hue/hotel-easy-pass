@@ -41,5 +41,19 @@ if (!dashboard.includes("Product Analytics")) throw new Error("dashboard.html is
 if (!dashboardJs.includes("hep_events")) throw new Error("dashboard.js is missing local analytics support");
 if (!pkg.includes('"test"')) throw new Error("package.json is missing the test script");
 
+
+const vm = require("node:vm");
+const readStoredJSONSource = main.slice(main.indexOf("function readStoredJSON("), main.indexOf("const state = {"));
+if (!readStoredJSONSource.includes("function readStoredJSON(")) throw new Error("Missing safe storage reader");
+const storageSandbox = {
+  localStorage: { getItem: () => "{invalid json" },
+  console: { warn: () => {} },
+  JSON
+};
+vm.runInNewContext(readStoredJSONSource + "\nglobalThis.readStoredJSON = readStoredJSON;", storageSandbox);
+if (storageSandbox.readStoredJSON("broken", { recovered: true }).recovered !== true) {
+  throw new Error("Invalid local storage should fall back safely");
+}
+
 console.log("Hotel Easy Pass smoke tests passed.");
 console.log("Checked " + required.length + " required application files plus analytics instrumentation.");
