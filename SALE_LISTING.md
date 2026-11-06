@@ -3,181 +3,74 @@
 ## Listing Title
 **Hotel Easy Pass | Adaptive Travel + Hotel Operations Platform | Web + Mobile Source**
 
-## Acquisition Pricing
-**$85,000 USD asking price**
+## Quick-sale asking price
+**$4,900 USD — reasonable offers welcome.**
 
-### Auction Positioning
-- **Starting bid:** $45,000
-- **Reserve:** $60,000
-- **Buy It Now:** $85,000
-
-The $85,000 price is for the **complete combined Hotel Easy Pass software asset**, including the traveler/client experience and hotel-owner/operator experience. These are not being sold as two separate $12,500 editions.
+This is a competitively priced, pre-revenue software-asset sale. The asking price covers the combined traveler and hotel-owner/operator product foundation, source code, deployment configuration and buyer handoff materials.
 
 ## What It Is
-Hotel Easy Pass is a mobile-first travel and hotel-operations platform designed around one core idea:
+Hotel Easy Pass is a mobile-first travel companion and hotel-operator PWA designed around one core idea:
 
 > **Don't make the traveler navigate the app. Make Hotel Easy Pass navigate the trip.**
 
-The current product uses guided onboarding to understand a trip's destination, purpose, travelers, stay length, hotel/rental/flight situation, needs and experience preferences. It then creates a trip profile and presents a more relevant travel experience.
+The traveler experience provides guided trip setup and utilities. The owner side provides a separate workspace for property, guest-offer and room-condition workflows.
 
-The owner side follows the same philosophy: **tell the system what you need, and let the workspace organize the work.**
-
-## Why This Is an $85K Software Asset
-This is positioned as a complete product platform rather than a simple hotel PWA.
-
-The buyer receives a working foundation that combines:
-
-- Adaptive traveler onboarding
-- Trip-type personalization for Business, Emergency, Leisure and Family travel
-- Guided trip profiles and personalized dashboard messaging
-- Traveler hotel/stay tools
-- Nearby destination discovery
-- Emergency travel tools
+## What the Buyer Receives
+- Traveler trip companion and guided trip setup
+- Trip-purpose options for Business, Emergency, Leisure and Family
+- Trip notes, packing/checklist, budget and tip utilities
+- Nearby food, gas, groceries and attraction discovery links
+- Emergency travel shortcuts
 - Room check-in/check-out photo documentation
-- Rewards, budget, packing and trip-planning utilities
+- Rewards tracking and trip sharing
 - Hotel owner/operator workspace
-- Owner personalization by name and role
-- Voice/text Owner Command Center foundation
-- Employee/staff scheduling foundation
-- Hotel offers and guest-benefit workflows
-- Mobile-ready source architecture
-- PWA installable experience
-- Live web deployment
-- Automated packaging and CI workflow
-- Full source code and buyer handoff materials
+- Property/contact setup and guest-offer drafts
+- Direct booking-link support
+- Room-condition inspection workflow
+- Browser-local product analytics dashboard with JSON export
+- Installable Progressive Web App assets
+- Complete source repository and deployment configuration
+- Automated smoke-test and CI workflow
+- Buyer handoff documentation
 
 ## Traveler Experience
-The traveler is guided through a short setup instead of being dropped into a generic dashboard.
+The traveler is guided through setup rather than dropped into a generic dashboard. The current flow supports a preferred name, destination, trip purpose, traveler count, stay length, hotel/rental/flight status, trip needs and experience preferences.
 
-The current flow can collect:
-- Preferred name
-- Destination
-- Trip purpose
-- Number of travelers
-- Length of stay
-- Hotel status
-- Rental status
-- Flight status
-- Trip needs
-- Experience preferences
-
-Trip-specific choices help prevent irrelevant recommendations. A business traveler can be guided toward quiet work-friendly options and convenient transportation, while a family traveler can receive family-oriented needs and experiences.
+External links, nearby information and partner offers should be validated by the buyer before commercial use.
 
 ## Hotel Owner Experience
-The owner workspace is designed to become an operating command center rather than another pile of hotel software tabs.
-
-Current foundations include:
-- Personalized owner setup
-- Owner name and role
-- Owner Command Center
-- Voice input where browser support is available
-- Text fallback
-- Saved owner requests
-- Staff scheduling
-- Property setup
-- Guest offers
-- Room-condition records
-- Guest benefits and local recommendations
-- Owner analytics foundation
-
-The long-term expansion path includes turning the staff scheduler into a standalone add-on such as **Hotel Easy Staff**.
-
-## AI-Ready Architecture
-Hotel Easy Pass is designed so AI can act as the reasoning and research layer behind the experience rather than forcing the traveler to interact with a giant chatbot.
-
-Potential AI expansion includes:
-- Destination research
-- Hotel and restaurant comparison
-- Trip-aware recommendations
-- Current travel information
-- Changing-plan assistance
-- Owner request interpretation
-- Staff/workflow organization
-- Contextual offers and partner recommendations
-
-The current sale is **not represented as an already-established AI service**. AI-ready architecture and expansion opportunities are described separately from features currently implemented.
+The owner workspace includes property and contact setup, promotion/offer drafts, direct booking link support, guest perks and local recommendations, room-condition documentation and browser-local product analytics. Browser speech recognition depends on device and browser support.
 
 ## Monetization Opportunities
-A buyer can build revenue around:
-- Hotel partner programs
-- Affiliate travel offers
-- Contextual advertising
-- Sponsored local offers
-- Hotel/operator subscriptions
-- B2B licensing
-- Premium traveler features
-- Booking and payment integrations
-- Loyalty partnerships
-- Add-on operational products
+A buyer can build revenue through hotel partner programs, affiliate travel offers, sponsored local offers, hotel/operator subscriptions, B2B licensing, premium traveler features, booking/payment integrations, loyalty partnerships and add-on operational products. These are opportunities, not current revenue streams.
 
 ## Technical Snapshot
-- HTML, CSS and JavaScript
+- Vanilla HTML, CSS and JavaScript
 - Progressive Web App manifest and service worker
 - Browser-local persistence
 - IndexedDB room-photo storage on supported browsers
 - Browser-local product analytics
-- GitHub Actions CI
-- Automated packaging workflow
+- GitHub Actions CI and automated packaging
 - Web deployment configuration
-- Expo / React Native mobile-ready source
-- Android APK-ready project configuration
-- iOS-ready project configuration
+- Render deployment
 
-## Current Deployment
-Live web application:
-https://hotel-easy-pass.onrender.com
+## Live Demo and Source
+- Live application: https://hotel-easy-pass.onrender.com
+- Traveler entry: https://hotel-easy-pass.onrender.com/
+- Owner hub: https://hotel-easy-pass.onrender.com/owner.html
+- Analytics dashboard: https://hotel-easy-pass.onrender.com/dashboard.html
+- Repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
 
-Repository:
-https://github.com/bennett2oakley-hue/hotel-easy-pass
+## Business Status and Important Disclosures
+Hotel Easy Pass is a **pre-revenue software asset / working PWA**, not an established revenue-generating business. No verified revenue, customers, profit, traffic, retention, hotel partnerships or recurring subscription revenue are included in this sale.
 
-## What the Buyer Receives
-- Complete Hotel Easy Pass source code
-- Traveler/client experience
-- Hotel owner/operator experience
-- Mobile-ready project source
-- PWA assets
-- Owner and traveler workflows
-- Documentation
-- Tests and CI configuration
-- Deployment configuration
-- Sale-package workflow
-- Commercial transfer of the software asset, subject to final sale terms
-
-## Important Disclosure
-Hotel Easy Pass is being sold as a **software asset / working product**, not as an established revenue-generating business.
-
-There are currently **no verified claims of revenue, customer count, profit, traffic, retention, hotel partnerships or recurring subscription revenue** included in this listing.
-
-The current build does not include:
-- A hosted universal booking engine
-- A payment processor
-- Universal PMS integrations
-- Universal smart-lock integrations
-- Server-side photo storage
-- Published native apps under the seller's developer accounts
-- A fully implemented AI research/backend service
-
-These are expansion opportunities for the buyer.
-
-Browser speech recognition also depends on browser/device support and may not be available everywhere.
+The current package does not include a hosted universal booking engine, payment processor, universal PMS integrations, universal smart-lock integrations, server-side photo storage, published native apps under the seller's developer accounts or a fully implemented AI research/backend service. Traveler and owner data are browser-local and may not follow a user to another device. These are expansion opportunities for the buyer.
 
 ## Buyer Opportunity
-The platform can be expanded into a larger travel and hotel technology business through:
-- PMS and hotel-system integrations
-- Booking and payment infrastructure
-- Smart-lock integrations
-- Cloud photo storage and team access
-- Hotel partnerships
-- Affiliate and referral programs
-- Subscription/B2B licensing
-- Native app publishing
-- AI research and recommendation services
-- Standalone hotel staff-management products
+The platform can be expanded with PMS integrations, booking/payment infrastructure, smart-lock integrations, cloud photo storage, team access, hotel partnerships, affiliate programs, subscription/B2B licensing, native app publishing and AI research/recommendation services.
 
 ## Transfer
-The buyer receives the software source and technical handoff materials needed to continue development and deployment. Personal credentials, unrelated accounts and personal data are not included.
+The buyer receives the agreed software source and technical handoff materials. Hosting and deployment should be recreated or transferred under buyer-owned accounts at closing. Personal credentials, unrelated accounts and personal data are excluded.
 
 ## Sale Position
-**Target acquisition price: $85,000**
-
-This price reflects the combined traveler + hotel-operator platform, current working product foundation, mobile-ready source, adaptive UX architecture and expansion potential.
+**Asking price: $4,900 USD.** Reasonable offers welcome for a straightforward asset transfer. The asking price is intended to attract serious buyer interest for the current working product foundation, not to imply revenue or a verified business valuation.
