@@ -1,0 +1,32 @@
+name: Expo mobile validation
+
+on:
+  push:
+    branches:
+      - expo-native-foundation
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check Expo package compatibility
+        run: npx expo install --check
+      - name: Run Expo Doctor
+        run: npx expo-doctor@latest
+      - name: Export Android JavaScript bundle
+        run: npx expo export --platform android --output-dir dist
