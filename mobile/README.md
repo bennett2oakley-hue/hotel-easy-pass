@@ -95,3 +95,14 @@ mobile/
 Expo version references:
 - SDK 57: https://docs.expo.dev/versions/v57.0.0/
 - Android Expo Go version selector: https://expo.dev/go
+
+
+## Existing backend configured for this branch
+
+- Supabase project: `hotel-easy-pass` in the existing Free organization, region `us-east-2`
+- Project reference: `edwnfpxprznbdjvneiaq`
+- Project URL is set as the client fallback in `src/lib/supabase.ts`; the publishable key is also set there and is not a service-role secret.
+- The app-specific SQL schema has been applied and verified: five public tables have RLS enabled with owner-scoped policies, and the private `hotel-easy-pass` Storage bucket exists.
+- Supabase Security Advisors returned no findings after the trigger function search path was hardened.
+
+The current React Native screens are still a foundation: they do not yet implement sign-up/sign-in or trip/property CRUD against these tables.
