@@ -2,6 +2,7 @@
 -- Inspect an existing database before applying; this is additive, not a destructive reset.
 create extension if not exists pgcrypto;
 grant usage on schema public to authenticated;
+revoke all privileges on table public.profiles, public.trips, public.saved_places, public.owner_properties, public.property_promotions from anon, authenticated, public;
 create or replace function public.set_updated_at() returns trigger language plpgsql set search_path = '' as $ begin new.updated_at=now(); return new; end; $;
 create table if not exists public.profiles(id uuid primary key references auth.users(id) on delete cascade,display_name text,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
 alter table public.profiles enable row level security;
@@ -20,7 +21,15 @@ create table if not exists public.saved_places(id uuid primary key default gen_r
 create table if not exists public.owner_properties(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id) on delete cascade,property_name text not null,address text,description text,contact_phone text,amenities jsonb not null default '[]'::jsonb,is_active boolean not null default true,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
 create table if not exists public.property_promotions(id uuid primary key default gen_random_uuid(),user_id uuid not null references auth.users(id) on delete cascade,property_id uuid references public.owner_properties(id) on delete cascade,title text not null,description text,starts_on date,ends_on date,is_active boolean not null default true,created_at timestamptz not null default now(),updated_at timestamptz not null default now());
 
-do $$ declare t text; begin foreach t in array array['trips','saved_places','owner_properties','property_promotions'] loop
+-- Cover the owner and relationship lookups used by the app.
+create index if not exists idx_trips_user_id on public.trips(user_id);
+create index if not exists idx_saved_places_user_id on public.saved_places(user_id);
+create index if not exists idx_saved_places_trip_id on public.saved_places(trip_id);
+create index if not exists idx_owner_properties_user_id on public.owner_properties(user_id);
+create index if not exists idx_property_promotions_user_id on public.property_promotions(user_id);
+create index if not exists idx_property_promotions_property_id on public.property_promotions(property_id);
+
+do $ declare t text; begin foreach t in array array['trips','saved_places','owner_properties','property_promotions'] loop
  execute format('alter table public.%I enable row level security',t);
  execute format('grant select,insert,update,delete on public.%I to authenticated',t);
  execute format('drop policy if exists %I on public.%I',t||'_select_own',t);
