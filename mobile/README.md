@@ -40,7 +40,7 @@ Use Node.js 22.13 or newer. Then clone this branch:
 ```sh
 git clone --branch expo-native-foundation --single-branch https://github.com/bennett2oakley-hue/hotel-easy-pass.git hotel-easy-pass
 cd hotel-easy-pass/mobile
-npm install
+npm ci
 npx expo install --fix
 npx expo-doctor@latest
 npx expo start --tunnel
@@ -106,3 +106,5 @@ Expo version references:
 - Supabase Security Advisors returned no findings after the trigger function search path was hardened.
 
 The current React Native screens are still a foundation: they do not yet implement sign-up/sign-in or trip/property CRUD against these tables.
+
+The checked-in `package-lock.json` pins the full dependency tree; use `npm ci` for repeatable installs.
