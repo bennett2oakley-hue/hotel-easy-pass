@@ -45,7 +45,7 @@ function resolvePublicFile(requestUrl) {
   if (pathname.includes("\\0") || pathname.split("/").some(part => part.startsWith("."))) {
     return { error: 403 };
   }
-  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\\/+/, "");
+  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   const full = path.resolve(root, relative);
   if (full !== root && !full.startsWith(root + path.sep)) return { error: 403 };
   return { file: full };
