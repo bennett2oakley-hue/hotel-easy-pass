@@ -42,7 +42,8 @@ function resolvePublicFile(requestUrl) {
   } catch {
     return { error: 400 };
   }
-  if (pathname.includes("\0") || pathname.split("/").some(part => part.startsWith("."))) {
+  if (pathname.includes(String.fromCharCode(0))) return { error: 400 };
+  if (pathname.split("/").some(part => part.startsWith("."))) return { error: 403 };
     return { error: 403 };
   }
   const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
