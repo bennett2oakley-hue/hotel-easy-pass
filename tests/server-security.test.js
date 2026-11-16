@@ -2,6 +2,15 @@ const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { spawn } = require("node:child_process");
 const http = require("node:http");
+const net = require("node:net");
+
+async function getFreePort() {
+  const server = net.createServer();
+  await new Promise((resolve, reject) => server.once("error", reject).listen(0, "127.0.0.1", resolve));
+  const port = server.address().port;
+  await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+  return port;
+}
 
 function request(port, method, path) {
   return new Promise((resolve, reject) => {
@@ -17,7 +26,7 @@ function request(port, method, path) {
 }
 
 test("static server enforces safe methods, paths, and security headers", async () => {
-  const port = 20000 + Math.floor(Math.random() * 20000);
+  const port = await getFreePort();
   const child = spawn(process.execPath, ["server.js"], { env: { ...process.env, PORT: String(port) }, stdio: "ignore" });
   try {
     let ready = false;
