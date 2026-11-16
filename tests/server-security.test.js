@@ -41,6 +41,10 @@ test("static server enforces safe methods, paths, and security headers", async (
     const malformed = await request(port, "GET", "/%E0%A4%A");
     assert.equal(malformed.status, 400);
 
+    // A decoded NUL must be rejected before filesystem access.
+    const nulPath = await request(port, "GET", "/%00");
+    assert.equal(nulPath.status, 400);
+
     const traversal = await request(port, "GET", "/..%2F..%2Fetc%2Fpasswd");
     assert.equal([403, 404].includes(traversal.status), true);
   } finally {
