@@ -1,8 +1,8 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 
-const root = __dirname;
+const root = path.resolve(__dirname);
 const port = Number(process.env.PORT || 10000);
 const types = {
   ".html": "text/html; charset=utf-8",
@@ -18,32 +18,66 @@ const types = {
   ".txt": "text/plain; charset=utf-8"
 };
 
-function safePath(urlPath) {
-  const decoded = decodeURIComponent((urlPath || "/").split("?")[0]);
-  const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
+function securityHeaders() {
+  return {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(self), microphone=(), geolocation=()",
+    "Content-Security-Policy": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'",
+    "Cross-Origin-Resource-Policy": "same-origin"
+  };
+}
+
+function send(res, status, headers, body) {
+  res.writeHead(status, { ...securityHeaders(), ...headers });
+  res.end(body);
+}
+
+function resolvePublicFile(requestUrl) {
+  let pathname;
+  try {
+    pathname = new URL(requestUrl, "http://localhost").pathname;
+    pathname = decodeURIComponent(pathname);
+  } catch {
+    return { error: 400 };
+  }
+  if (pathname.includes("\\0") || pathname.split("/").some(part => part.startsWith("."))) {
+    return { error: 403 };
+  }
+  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\\/+/, "");
   const full = path.resolve(root, relative);
-  return full.startsWith(root + path.sep) ? full : null;
+  if (full !== root && !full.startsWith(root + path.sep)) return { error: 403 };
+  return { file: full };
 }
 
 const server = http.createServer((req, res) => {
-  const file = safePath(req.url);
-  if (!file) {
-    res.writeHead(403, {"Content-Type": "text/plain; charset=utf-8"});
-    return res.end("Forbidden");
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    return send(res, 405, { "Content-Type": "text/plain; charset=utf-8", Allow: "GET, HEAD" }, "Method Not Allowed");
   }
 
-  fs.stat(file, (err, stat) => {
-    if (err || !stat.isFile()) {
-      res.writeHead(404, {"Content-Type": "text/html; charset=utf-8"});
-      return res.end("<h1>404</h1><p>Hotel Easy Pass page not found.</p>");
-    }
+  const resolved = resolvePublicFile(req.url || "/");
+  if (resolved.error) {
+    return send(res, resolved.error, { "Content-Type": "text/plain; charset=utf-8" }, resolved.error === 403 ? "Forbidden" : "Bad Request");
+  }
 
-    const ext = path.extname(file).toLowerCase();
-    res.writeHead(200, {
+  fs.stat(resolved.file, (err, stat) => {
+    if (err || !stat.isFile()) {
+      return send(res, 404, { "Content-Type": "text/html; charset=utf-8" }, "<h1>404</h1><p>Hotel Easy Pass page not found.</p>");
+    }
+    const ext = path.extname(resolved.file).toLowerCase();
+    const headers = {
       "Content-Type": types[ext] || "application/octet-stream",
       "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600"
+    };
+    if (req.method === "HEAD") return send(res, 200, headers, "");
+    const stream = fs.createReadStream(resolved.file);
+    stream.on("error", () => {
+      if (!res.headersSent) send(res, 500, { "Content-Type": "text/plain; charset=utf-8" }, "Server Error");
+      else res.destroy();
     });
-    fs.createReadStream(file).pipe(res);
+    res.writeHead(200, { ...securityHeaders(), ...headers });
+    stream.pipe(res);
   });
 });
 
