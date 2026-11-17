@@ -50,7 +50,7 @@ function resolvePublicFile(requestUrl) {
   if (pathname.includes(String.fromCharCode(0))) return { error: 400 };
   if (pathname.split("/").some(part => part.startsWith("."))) return { error: 403 };
   const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
-  const full = path.resolve(root, relative);
+  if (!publicFiles.has(relative)) return { error: 403 };\n  const full = path.resolve(root, relative);
   if (full !== root && !full.startsWith(root + path.sep)) return { error: 403 };
   return { file: full };
 }
