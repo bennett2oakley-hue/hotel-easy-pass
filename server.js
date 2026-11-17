@@ -3,6 +3,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname);
+const publicFiles = new Set([
+  "index.html", "traveler.html", "owner.html", "dashboard.html",
+  "dashboard.js", "main.js", "faq.html", "privacy.html", "terms.html",
+  "404.html", "manifest.webmanifest", "sw.js", "robots.txt", "sitemap.xml"
+]);
 const port = Number(process.env.PORT || 10000);
 const types = {
   ".html": "text/html; charset=utf-8",
