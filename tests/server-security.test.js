@@ -46,6 +46,9 @@ test("static server enforces safe methods, paths, and security headers", async (
 
     const dotfile = await request(port, "GET", "/.env");
     assert.equal(dotfile.status, 403);
+    assert.equal((await request(port, "GET", "/server.js")).status, 403);
+    assert.equal((await request(port, "GET", "/package.json")).status, 403);
+    assert.equal((await request(port, "GET", "/mobile/App.tsx")).status, 403);
 
     const malformed = await request(port, "GET", "/%E0%A4%A");
     assert.equal(malformed.status, 400);
