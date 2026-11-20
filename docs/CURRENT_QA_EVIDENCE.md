@@ -1,0 +1,1 @@
+Hotel Easy Pass QA evidence — 2026-11-20
