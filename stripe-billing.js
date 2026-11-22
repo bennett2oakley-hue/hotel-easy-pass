@@ -63,6 +63,14 @@ async function createCheckout(req) {
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   const user = await supabaseUser(token);
   if (!user) return json(401, { ok: false, error: "Create an account or sign in before unlocking Hotel Easy Pass." });
+  const existing = await supabaseAdmin(
+    "app_entitlements?user_id=eq." + encodeURIComponent(user.id) +
+    "&app_slug=eq." + APP_SLUG + "&status=eq.active&select=id",
+    { method: "GET" }
+  );
+  if (Array.isArray(existing) && existing.length) {
+    return json(409, { ok: false, error: "This account has already unlocked Hotel Easy Pass." });
+  }
   const appUrl = (process.env.APP_URL || "https://hotel-easy-pass.onrender.com").replace(/\/$/, "");
   const params = new URLSearchParams();
   params.set("mode", "payment");
@@ -114,6 +122,17 @@ async function fulfillSession(session) {
     }])
   });
 }
+async function setPaymentAccessStatus(paymentIntentId, status) {
+  if (!paymentIntentId || typeof paymentIntentId !== "string") return;
+  await supabaseAdmin(
+    "app_entitlements?stripe_payment_intent_id=eq." + encodeURIComponent(paymentIntentId),
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ status, updated_at: new Date().toISOString() })
+    }
+  );
+}
 async function webhook(req) {
   if (!process.env.STRIPE_WEBHOOK_SECRET || !process.env.SUPABASE_SERVICE_ROLE_KEY) return json(503, { ok: false, error: "Webhook is not configured." });
   let raw;
@@ -124,8 +143,17 @@ async function webhook(req) {
   try { event = JSON.parse(raw.toString("utf8")); }
   catch { return json(400, { ok: false, error: "Invalid webhook JSON." }); }
   try {
+    const prior = await supabaseAdmin(
+      "stripe_webhook_events?event_id=eq." + encodeURIComponent(event.id) + "&select=event_id",
+      { method: "GET" }
+    );
+    if (Array.isArray(prior) && prior.length) return json(200, { received: true, duplicate: true });
     if (event.type === "checkout.session.completed" || event.type === "checkout.session.async_payment_succeeded") {
       await fulfillSession(event.data.object);
+    } else if (event.type === "charge.refunded") {
+      await setPaymentAccessStatus(event.data.object.payment_intent, "refunded");
+    } else if (event.type === "charge.dispute.created") {
+      await setPaymentAccessStatus(event.data.object.payment_intent, "revoked");
     }
     await supabaseAdmin("stripe_webhook_events?on_conflict=event_id", {
       method: "POST",
