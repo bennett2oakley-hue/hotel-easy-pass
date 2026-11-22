@@ -6,8 +6,8 @@ const root = path.resolve(__dirname, "..");
 const required = ["index.html", "server.js", "dashboard.html", "dashboard.js", "manifest.webmanifest", "sw.js", "privacy.html", "terms.html", "package.json", "package-lock.json"];
 for (const file of required) {
   const full = path.join(root, file);
-  if (!fs.existsSync(full)) throw new Error("Missing required file: " + file);
-  if (!fs.statSync(full).size) throw new Error("Required file is empty: " + file);
+  if (!fs.existsSync(full)) throw new Error("Missing owner app file: " + file);
+  if (!fs.statSync(full).size) throw new Error("Owner app file is empty: " + file);
 }
 const index = fs.readFileSync(path.join(root, "index.html"), "utf8");
 const dashboard = fs.readFileSync(path.join(root, "dashboard.html"), "utf8");
@@ -20,7 +20,5 @@ if (index.includes("traveler.html") || index.includes("TRAVELER PASS")) throw ne
 if (!dashboard.includes("Product Analytics")) throw new Error("Owner analytics dashboard is missing.");
 if (!dashboardJs.includes("hep_events")) throw new Error("Owner analytics instrumentation is missing.");
 if (!manifest.includes("name")) throw new Error("Owner PWA manifest is missing its app name.");
-new vm.Script(fs.readFileSync(path.join(root, "server.js"), "utf8"), { filename: "server.js" });
-new vm.Script(dashboardJs, { filename: "dashboard.js" });
+for (const file of ["server.js", "dashboard.js"]) new vm.Script(fs.readFileSync(path.join(root, file), "utf8"), { filename: file });
 console.log("Hotel Easy Pass Owner smoke tests passed.");
-console.log("Checked " + required.length + " owner application files.");
