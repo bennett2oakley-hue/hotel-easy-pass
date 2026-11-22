@@ -4,6 +4,7 @@
   let user = null;
   let hasAccess = false;
   let ready = false;
+  let configured = false;
 
   function status(message) {
     const node = document.getElementById("hepBillingStatus");
@@ -14,10 +15,11 @@
     const auth = document.getElementById("hepBillingAuth");
     const signOut = document.getElementById("hepSignOut");
     const unlock = document.getElementById("hepUnlock");
-    if (auth) auth.classList.toggle("hidden", signedIn);
-    if (signOut) signOut.classList.toggle("hidden", !signedIn);
-    if (unlock) unlock.classList.toggle("hidden", !signedIn || hasAccess);
-    if (hasAccess) status("Hotel Easy Pass is unlocked for this account.");
+    if (auth) auth.hidden = signedIn;
+    if (signOut) signOut.hidden = !signedIn;
+    if (unlock) unlock.hidden = !signedIn || hasAccess;
+    if (!configured) status("Account billing is not configured yet. The dedicated Hotel Easy Pass database must be restored and configured.");
+    else if (hasAccess) status("Hotel Easy Pass is unlocked for this account.");
     else if (signedIn) status("Signed in as " + (user.email || "your account") + ". Complete the one-time unlock to use Traveler Pass.");
     else status("Create an account or sign in, then unlock Traveler Pass with a one-time payment.");
     window.hepBilling = { ready, hasAccess, user, refresh };
@@ -53,6 +55,7 @@
         paint();
         return;
       }
+      configured = true;
       client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
@@ -84,7 +87,7 @@
     status("Creating your account…");
     const result = await client.auth.signUp({ email, password });
     if (result.error) return status(result.error.message);
-    user = result.data.user || null;
+    user = result.data.session ? (result.data.user || null) : null;
     if (result.data.session) await refresh();
     else status("Account created. Check your email to confirm, then sign in.");
   };
