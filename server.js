@@ -84,7 +84,8 @@ async function handler(req, res) {
     headers(res, 200, "application/json; charset=utf-8");
     return res.end(JSON.stringify({
       supabaseUrl: process.env.SUPABASE_URL || "",
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || ""
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
+      billingReady: !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET && process.env.STRIPE_PRICE_UNLOCK && process.env.SUPABASE_SERVICE_ROLE_KEY)
     }));
   }
   if (pathname === "/api/stripe/checkout") {
