@@ -2,7 +2,7 @@ name: Build Hotel Easy Pass Package
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "owner-app"]
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
       - name: Upload sale package
         uses: actions/upload-artifact@v4
         with:
-          name: hotel-easy-pass-sale-package
+          name: hotel-easy-pass-owner-package
           path: package
           include-hidden-files: true
           if-no-files-found: error
