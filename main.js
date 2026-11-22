@@ -1052,6 +1052,7 @@ textarea{min-height:120px;resize:vertical}.card>input{margin-top:9px}
 document.head.appendChild(style);
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(() => {}));
+window.addEventListener('hep-billing-ready',render);
 render();
 
 
