@@ -31,3 +31,11 @@ create policy "Hotel Easy Pass users read own entitlement"
   on public.app_entitlements for select to authenticated
   using ((select auth.uid()) = user_id and app_slug = 'hotel-easy-pass');
 revoke all on public.stripe_webhook_events from anon, authenticated;
+
+drop policy if exists "No client access to Hotel Easy Pass webhook events" on public.stripe_webhook_events;
+create policy "No client access to Hotel Easy Pass webhook events"
+  on public.stripe_webhook_events
+  for all
+  to anon, authenticated
+  using (false)
+  with check (false);
