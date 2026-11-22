@@ -4,6 +4,10 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const required = [
   "index.html",
+  "server.js",
+  "stripe-billing.js",
+  "billing.js",
+  "supabase/stripe_entitlements.sql",
   "traveler.html",
   "owner.html",
   "dashboard.html",
@@ -43,6 +47,9 @@ if (!pkg.includes('"test"')) throw new Error("package.json is missing the test s
 
 
 const vm = require("node:vm");
+for (const file of ["server.js", "stripe-billing.js", "billing.js", "main.js"]) {
+  new vm.Script(fs.readFileSync(path.join(root, file), "utf8"), { filename: file });
+}
 const readStoredJSONSource = main.slice(main.indexOf("function readStoredJSON("), main.indexOf("const state = {"));
 if (!readStoredJSONSource.includes("function readStoredJSON(")) throw new Error("Missing safe storage reader");
 const storageSandbox = {
