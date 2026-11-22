@@ -22,7 +22,7 @@
     else if (hasAccess) status("Hotel Easy Pass is unlocked for this account.");
     else if (signedIn) status("Signed in as " + (user.email || "your account") + ". Complete the one-time unlock to use Traveler Pass.");
     else status("Create an account or sign in, then unlock Traveler Pass with a one-time payment.");
-    window.hepBilling = { ready, hasAccess, user, refresh };
+    window.hepBilling = { ready, configured, hasAccess, user, refresh };
     window.dispatchEvent(new CustomEvent("hep-billing-ready", { detail: { ready, hasAccess } }));
   }
   async function refresh() {
@@ -49,7 +49,7 @@
     try {
       const response = await fetch("/api/config", { cache: "no-store" });
       const config = await response.json();
-      if (!config.supabaseUrl || !config.supabaseAnonKey || !window.supabase?.createClient) {
+      if (!config.supabaseUrl || !config.supabaseAnonKey || !config.billingReady || !window.supabase?.createClient) {
         ready = true;
         status("Account billing is not configured yet. Local preview is unavailable until the dedicated Hotel Easy Pass database is restored and configured.");
         paint();
