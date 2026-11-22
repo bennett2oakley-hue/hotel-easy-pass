@@ -69,6 +69,7 @@ function money(value) {
 }
 
 function render(){
+  if(window.hepBilling?.ready && !window.hepBilling.hasAccess){document.getElementById('app').innerHTML='<section class="journey-card"><h1>Unlock Traveler Pass</h1><p class="journey-lead">Sign in or create an account above, then complete the one-time unlock to access the full Hotel Easy Pass traveler experience.</p><p class="journey-note">Your local trip information remains on this device. Payment unlocks this account on supported devices.</p></section>';return;}
   const t=state.traveler;
   if(!t.name){
     renderNameStep();
