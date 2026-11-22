@@ -69,6 +69,9 @@ async function readJson(req) {
 function safePath(urlPath) {
   const decoded = decodeURIComponent((urlPath || "/").split("?")[0]);
   const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
+  const parts = relative.split(/[\\/]/);
+  const privateFiles = new Set(["server.js", "stripe-billing.js", "package.json", "package-lock.json", ".env.example"]);
+  if (parts.some(part => part.startsWith(".")) || privateFiles.has(relative) || relative.startsWith("supabase/") || relative.startsWith("tests/")) return null;
   const full = path.resolve(root, relative);
   return full.startsWith(root + path.sep) ? full : null;
 }
