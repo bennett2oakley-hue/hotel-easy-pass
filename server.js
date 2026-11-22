@@ -1,130 +1,66 @@
-const http = require("http");
-const fs = require("fs");
-const path = require("path");
-
-function loadLocalEnv() {
-  const envPath = path.join(__dirname, ".env.local");
-  if (!fs.existsSync(envPath)) return;
-  for (const line of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const index = trimmed.indexOf("=");
-    if (index < 1) continue;
-    const key = trimmed.slice(0, index).trim();
-    let value = trimmed.slice(index + 1).trim();
-    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1);
-    if (!process.env[key]) process.env[key] = value;
-  }
-}
-loadLocalEnv();
-const { createCheckout, webhook } = require("./stripe-billing");
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const root = __dirname;
 const port = Number(process.env.PORT || 10000);
+const publicFiles = new Set([
+  "index.html", "dashboard.html", "dashboard.js", "faq.html",
+  "privacy.html", "terms.html", "manifest.webmanifest", "sw.js",
+  "404.html", "robots.txt", "sitemap.xml"
+]);
 const types = {
   ".html": "text/html; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".webmanifest": "application/manifest+json; charset=utf-8",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".svg": "image/svg+xml",
-  ".ico": "image/x-icon",
-  ".txt": "text/plain; charset=utf-8"
+  ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg",
+  ".svg": "image/svg+xml", ".ico": "image/x-icon", ".txt": "text/plain; charset=utf-8"
 };
-function headers(res, status, contentType) {
+function send(res, status, type, body) {
   res.writeHead(status, {
-    "Content-Type": contentType,
+    "Content-Type": type,
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Cache-Control": "no-store"
   });
+  res.end(body);
 }
-function reply(res, result) {
-  res.writeHead(result.status, {
-    "Content-Type": "application/json; charset=utf-8",
-    "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
-    "Cache-Control": "no-store",
-    ...(result.headers || {})
-  });
-  res.end(result.body);
-}
-async function readJson(req) {
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > 8192) throw Object.assign(new Error("Request body too large"), { statusCode: 413 });
-    chunks.push(chunk);
-  }
-  if (!chunks.length) return {};
-  const parsed = JSON.parse(Buffer.concat(chunks).toString("utf8"));
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw Object.assign(new Error("JSON body must be an object"), { statusCode: 400 });
-  return parsed;
-}
-function safePath(urlPath) {
-  const decoded = decodeURIComponent((urlPath || "/").split("?")[0]);
-  const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
-  const parts = relative.split(/[\\/]/);
-  const privateFiles = new Set(["server.js", "stripe-billing.js", "package.json", "package-lock.json", ".env.example"]);
-  if (parts.some(part => part.startsWith(".")) || privateFiles.has(relative) || relative.startsWith("supabase/") || relative.startsWith("tests/")) return null;
-  const full = path.resolve(root, relative);
-  return full.startsWith(root + path.sep) ? full : null;
-}
-async function handler(req, res) {
+function resolvePublicPath(requestUrl) {
   let pathname;
-  try { pathname = new URL(req.url, "http://localhost").pathname; }
-  catch { headers(res, 400, "text/plain; charset=utf-8"); return res.end("Bad Request"); }
-
-  if (pathname === "/api/config" && req.method === "GET") {
-    headers(res, 200, "application/json; charset=utf-8");
-    return res.end(JSON.stringify({
-      supabaseUrl: process.env.SUPABASE_URL || "",
-      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || "",
-      billingReady: !!(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET && process.env.STRIPE_PRICE_UNLOCK && process.env.SUPABASE_SERVICE_ROLE_KEY)
-    }));
-  }
-  if (pathname === "/api/stripe/checkout") {
-    if (req.method !== "POST") { headers(res, 405, "application/json; charset=utf-8"); return res.end(JSON.stringify({ error: "Method not allowed" })); }
-    try { await readJson(req); }
-    catch (error) { headers(res, error.statusCode || 400, "application/json; charset=utf-8"); return res.end(JSON.stringify({ ok: false, error: error.message })); }
-    return reply(res, await createCheckout(req));
-  }
-  if (pathname === "/api/stripe/webhook") {
-    if (req.method !== "POST") { headers(res, 405, "application/json; charset=utf-8"); return res.end(JSON.stringify({ error: "Method not allowed" })); }
-    return reply(res, await webhook(req));
+  try { pathname = decodeURIComponent(new URL(requestUrl, "http://localhost").pathname); }
+  catch { return { error: 400 }; }
+  if (pathname.includes(String.fromCharCode(0))) return { error: 400 };
+  if (pathname.split("/").some(part => part.startsWith("."))) return { error: 403 };
+  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  if (!publicFiles.has(relative)) return { error: 403 };
+  const full = path.resolve(root, relative);
+  if (!full.startsWith(root + path.sep)) return { error: 403 };
+  return { file: full };
+}
+const server = http.createServer((req, res) => {
+  if (req.method === "GET" && new URL(req.url, "http://localhost").pathname === "/health") {
+    return send(res, 200, "application/json; charset=utf-8", JSON.stringify({ ok: true, app: "Hotel Easy Pass Owner" }));
   }
   if (req.method !== "GET" && req.method !== "HEAD") {
-    headers(res, 405, "text/plain; charset=utf-8");
-    return res.end("Method Not Allowed");
+    return send(res, 405, "text/plain; charset=utf-8", "Method Not Allowed");
   }
-  const file = safePath(req.url);
-  if (!file) { headers(res, 403, "text/plain; charset=utf-8"); return res.end("Forbidden"); }
-  fs.stat(file, (err, stat) => {
-    if (err || !stat.isFile()) {
-      headers(res, 404, "text/html; charset=utf-8");
-      return res.end("<h1>404</h1><p>Hotel Easy Pass page not found.</p>");
-    }
-    const ext = path.extname(file).toLowerCase();
+  const resolved = resolvePublicPath(req.url);
+  if (resolved.error) return send(res, resolved.error, "text/plain; charset=utf-8", resolved.error === 403 ? "Forbidden" : "Bad Request");
+  fs.stat(resolved.file, (error, stat) => {
+    if (error || !stat.isFile()) return send(res, 404, "text/html; charset=utf-8", "<h1>404</h1><p>Hotel Easy Pass Owner page not found.</p>");
+    const ext = path.extname(resolved.file).toLowerCase();
     res.writeHead(200, {
       "Content-Type": types[ext] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
       "X-Frame-Options": "DENY",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
       "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600"
     });
     if (req.method === "HEAD") return res.end();
-    fs.createReadStream(file).pipe(res);
-  });
-}
-const server = http.createServer((req, res) => {
-  handler(req, res).catch(error => {
-    console.error("Hotel Easy Pass request failed:", error.message);
-    if (!res.headersSent) { headers(res, 500, "application/json; charset=utf-8"); res.end(JSON.stringify({ error: "Server error" })); }
-    else res.destroy();
+    fs.createReadStream(resolved.file).pipe(res);
   });
 });
-server.listen(port, "0.0.0.0", () => console.log("Hotel Easy Pass listening on port " + port));
+server.listen(port, "0.0.0.0", () => console.log("Hotel Easy Pass Owner listening on port " + port));
