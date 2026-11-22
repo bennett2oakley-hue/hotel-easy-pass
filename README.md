@@ -45,7 +45,7 @@ Hotel Easy Pass includes browser-local product analytics. Lightweight events are
 - Browser-local persistence for current user data
 - Browser-local product analytics
 - IndexedDB room-photo storage on supported browsers
-- No required database
+- Supabase Auth and a dedicated entitlement database are required for paid Traveler Pass unlock
 - No framework build step
 
 ## Quality and delivery
@@ -58,6 +58,29 @@ Hotel Easy Pass includes browser-local product analytics. Lightweight events are
 - Netlify configuration
 - Nginx/Docker deployment option
 - Automated clean sale-package workflow
+
+## Stripe one-time unlock
+
+Hotel Easy Pass uses Stripe Checkout in one-time payment mode to unlock the Traveler Pass for a signed-in account. The webhook verifies Stripe's signature and records a lifetime entitlement in the dedicated Hotel Easy Pass Supabase project. This is separate from every other app's billing and customer records.
+
+### Database and account setup
+
+1. Restore the existing free-plan Supabase project named \`hotel-easy-pass\` in the user's existing free organization. Do not create another project or upgrade the organization.
+2. Set the private environment variables shown in \`.env.example\` on the Render service. The browser receives only the Supabase URL and publishable key from \`/api/config\`.
+3. Run \`supabase/stripe_entitlements.sql\` in that dedicated project's SQL Editor.
+4. Confirm the \`app_entitlements\` table is exposed to the Data API with RLS enabled. Users can read only their own entitlement; the server service key writes payment records.
+
+### Stripe test-mode setup
+
+1. In Stripe test mode, create one Hotel Easy Pass product and a one-time price for the Traveler Pass unlock.
+2. Set that Price ID as \`STRIPE_PRICE_UNLOCK\`.
+3. Set the test Secret Key as \`STRIPE_SECRET_KEY\`.
+4. Register \`https://hotel-easy-pass.onrender.com/api/stripe/webhook\` and subscribe to \`checkout.session.completed\` and \`checkout.session.async_payment_succeeded\`.
+5. Set the endpoint signing secret as \`STRIPE_WEBHOOK_SECRET\`.
+6. Set \`SUPABASE_SERVICE_ROLE_KEY\` only in Render's private environment settings. Never expose it to browser code or commit it.
+7. Run a test payment with a test account. Confirm the \`app_entitlements\` row for that account becomes \`active\` with plan \`lifetime\`.
+
+For local development, copy \`.env.example\` to \`.env.local\`. The Node server loads \`.env.local\` automatically; the file is ignored by Git. Use only Stripe test-mode credentials until checkout, webhook fulfillment, and refund handling have been verified. Real Stripe transactions incur fees.
 
 ## Local development
 
@@ -72,7 +95,7 @@ npm test
 
 ## Current product boundaries
 
-The current package does not include a hosted booking engine, payment processor, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Those are future expansion opportunities, not existing functionality. Data stored in a browser may not follow a user to another device and may be removed when browser data is cleared.
+The current package does not include a hosted booking engine, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Those are future expansion opportunities, not existing functionality. Data stored in a browser may not follow a user to another device and may be removed when browser data is cleared.
 
 ## Included package
 
