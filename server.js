@@ -67,11 +67,13 @@ async function readJson(req) {
   return parsed;
 }
 function safePath(urlPath) {
-  const decoded = decodeURIComponent((urlPath || "/").split("?")[0]);
-  const relative = decoded === "/" ? "index.html" : decoded.replace(/^\/+/, "");
-  const parts = relative.split(/[\\/]/);
-  const privateFiles = new Set(["server.js", "stripe-billing.js", "package.json", "package-lock.json", ".env.example"]);
-  if (parts.some(part => part.startsWith(".")) || privateFiles.has(relative) || relative.startsWith("supabase/") || relative.startsWith("tests/")) return null;
+  let decoded;
+  try { decoded = decodeURIComponent((urlPath || "/").split("?")[0]); } catch { return null; }
+  if (decoded.includes(String.fromCharCode(0))) return null;
+  const relative = decoded === "/" ? "index.html" : decoded.replace(/^\\/+/, "");
+  const parts = relative.split(/[\\\\/]/);
+  const publicFiles = new Set(["index.html", "main.js", "billing.js", "manifest.webmanifest", "sw.js", "faq.html", "privacy.html", "terms.html", "404.html", "robots.txt", "sitemap.xml"]);
+  if (parts.some(part => part.startsWith(".")) || !publicFiles.has(relative)) return null;
   const full = path.resolve(root, relative);
   return full.startsWith(root + path.sep) ? full : null;
 }
@@ -80,6 +82,10 @@ async function handler(req, res) {
   try { pathname = new URL(req.url, "http://localhost").pathname; }
   catch { headers(res, 400, "text/plain; charset=utf-8"); return res.end("Bad Request"); }
 
+  if (pathname === "/health" && req.method === "GET") {
+    headers(res, 200, "application/json; charset=utf-8");
+    return res.end(JSON.stringify({ ok: true, app: "Hotel Easy Pass Traveler" }));
+  }
   if (pathname === "/api/config" && req.method === "GET") {
     headers(res, 200, "application/json; charset=utf-8");
     return res.end(JSON.stringify({
