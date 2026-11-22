@@ -124,6 +124,5 @@
       status(error.message || "Checkout could not be started. No payment was taken.");
     }
   };
-  document.addEventListener("DOMContentLoaded", init);
-  if (document.readyState !== "loading") init();
+  init();
 })();
