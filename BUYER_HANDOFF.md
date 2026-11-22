@@ -1,47 +1,23 @@
-# Hotel Easy Pass Buyer Handoff
+# Buyer Handoff — Hotel Easy Pass Traveler
 
-## Asset summary
-Hotel Easy Pass is a mobile-first travel companion and hotel-operator PWA.
+## What is included
+- Standalone consumer/traveler PWA (root `index.html`)
+- Traveler trip dashboard, nearby travel tools, trip notes, budget and tip tools
+- Rewards and checklist utilities
+- Emergency travel shortcuts
+- Room photo check-in/check-out documentation
+- Supabase Auth and traveler entitlement client code
+- Stripe one-time Traveler Pass Checkout and webhook source
+- Installable PWA, privacy/terms pages and Node smoke tests
 
-- Live demo: https://hotel-easy-pass.onrender.com/
-- Traveler entry: https://hotel-easy-pass.onrender.com/
-- Owner hub: https://hotel-easy-pass.onrender.com/owner.html
-- Analytics dashboard: https://hotel-easy-pass.onrender.com/dashboard.html
-- Source repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
-- Stack: vanilla HTML/CSS/JavaScript, PWA manifest/service worker, optional simple Node static server
-- Local checks: `npm ci`, then `npm test`
+## Separate product boundary
+This branch contains the Traveler app only. It does not contain the Hotel Owner workspace, owner analytics dashboard, owner staff scheduling, or owner property/offer tools.
 
-## Included
-- Traveler trip companion and dashboard
-- Packing/checklist and trip-note workflows
-- Budget/tip utilities and rewards tracking
-- Emergency travel shortcuts and local recommendation tools
-- Hotel-owner hub and offer/partner-link tools
-- Room-condition/photo documentation workflow
-- Browser-local analytics dashboard with JSON export
-- PWA assets and deployment configurations
+## Current operational limits
+- Traveler authentication and entitlement storage depend on the dedicated Hotel Easy Pass Traveler Supabase project and its private hosting configuration.
+- Stripe checkout is not considered live until a separate Traveler Stripe account is connected, test-mode price and webhook credentials are configured, and purchase/refund/access-revocation tests pass.
+- The app is a trip utility, not a hotel booking engine or PMS integration. It does not guarantee live room rates or availability.
+- Browser-local trip data may not follow the user across devices.
 
-## Known limits to disclose
-This is a client-side PWA with browser-local persistence. Analytics are stored locally on the current browser/device, not in a central hosted analytics service. The current package does not include a hosted booking engine, payment processor, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Data stored in a browser may not follow a user to another device and may be removed when browser data is cleared. Any external links, nearby information, or partner offers must be validated by the buyer before commercial use.
-
-## Transfer checklist
-1. Transfer repository ownership or provide a source archive at closing.
-2. Transfer hosting only after both parties agree; recreate any provider credentials under buyer ownership.
-3. Verify privacy and terms content for the buyer's intended geography and use case.
-4. Test traveler and owner flows on mobile and desktop.
-5. Test photo capture/storage permissions and local persistence on supported browsers.
-6. Verify analytics export and clear-history controls.
-7. Replace all demo/sample content before commercial launch.
-
-## Acceptance checklist
-- [ ] New visitor can enter a nickname and continue
-- [ ] Traveler dashboard and primary navigation work
-- [ ] Trip/checklist/notes features work and persist locally as expected
-- [ ] Owner hub loads and editable features behave as expected
-- [ ] Analytics dashboard loads, renders empty state, and exports JSON
-- [ ] Photo capture/documentation works on a supported device/browser
-- [ ] Install prompt/manifest works where supported
-- [ ] Run `npm ci && npm test`
-
-## Sale representation
-Market as a travel companion PWA / early-stage software asset. Do not promise hotel booking, payment processing, universal PMS or smart-lock integration, or cloud-synced traveler records unless those capabilities are separately implemented and verified.
+## Deploy
+Deploy the `traveler-app` branch as its own web service and domain. Use the included Node server and `npm test`. Keep all Traveler Supabase and Stripe credentials in private host environment settings.
