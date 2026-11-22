@@ -1,47 +1,25 @@
-# Hotel Easy Pass Buyer Handoff
+# Buyer Handoff — Hotel Easy Pass Owner
 
-## Asset summary
-Hotel Easy Pass is a mobile-first travel companion and hotel-operator PWA.
+## What is included
+- Standalone Hotel Owner PWA (root `index.html`)
+- Owner identity and workspace personalization
+- Voice-to-text owner request capture (browser support dependent)
+- Staff shift scheduler
+- Property profile and contact setup
+- Guest offer and direct-booking link drafts
+- Before/after room-condition photo records
+- Local product analytics dashboard
+- Dedicated static Node server, health endpoint and owner-only file allowlist
+- Owner-specific smoke tests
 
-- Live demo: https://hotel-easy-pass.onrender.com/
-- Traveler entry: https://hotel-easy-pass.onrender.com/
-- Owner hub: https://hotel-easy-pass.onrender.com/owner.html
-- Analytics dashboard: https://hotel-easy-pass.onrender.com/dashboard.html
-- Source repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
-- Stack: vanilla HTML/CSS/JavaScript, PWA manifest/service worker, optional simple Node static server
-- Local checks: `npm ci`, then `npm test`
+## Separate product boundary
+This branch contains the Owner app only. It does not contain the Traveler Pass, traveler login, traveler billing, Stripe checkout code, or traveler entitlement database.
 
-## Included
-- Traveler trip companion and dashboard
-- Packing/checklist and trip-note workflows
-- Budget/tip utilities and rewards tracking
-- Emergency travel shortcuts and local recommendation tools
-- Hotel-owner hub and offer/partner-link tools
-- Room-condition/photo documentation workflow
-- Browser-local analytics dashboard with JSON export
-- PWA assets and deployment configurations
+## Current operational limits
+- Owner records and inspection photos are stored in the browser on the current device. There is no multi-user cloud database, owner authentication, or cross-device sync in this version.
+- Offer drafts are not published to a traveler marketplace. The operator must distribute direct booking links themselves.
+- No owner subscription or payment processing is enabled. A separate Owner Stripe account and a dedicated Owner data/auth service are required before paid subscriptions or shared team workflows can be activated.
+- Staff scheduling is a lightweight local planner, not a payroll or workforce-management system.
 
-## Known limits to disclose
-This is a client-side PWA with browser-local persistence. Analytics are stored locally on the current browser/device, not in a central hosted analytics service. The current package does not include a hosted booking engine, payment processor, universal hotel/PMS integration, universal smart-lock integration, or server-side photo storage. Data stored in a browser may not follow a user to another device and may be removed when browser data is cleared. Any external links, nearby information, or partner offers must be validated by the buyer before commercial use.
-
-## Transfer checklist
-1. Transfer repository ownership or provide a source archive at closing.
-2. Transfer hosting only after both parties agree; recreate any provider credentials under buyer ownership.
-3. Verify privacy and terms content for the buyer's intended geography and use case.
-4. Test traveler and owner flows on mobile and desktop.
-5. Test photo capture/storage permissions and local persistence on supported browsers.
-6. Verify analytics export and clear-history controls.
-7. Replace all demo/sample content before commercial launch.
-
-## Acceptance checklist
-- [ ] New visitor can enter a nickname and continue
-- [ ] Traveler dashboard and primary navigation work
-- [ ] Trip/checklist/notes features work and persist locally as expected
-- [ ] Owner hub loads and editable features behave as expected
-- [ ] Analytics dashboard loads, renders empty state, and exports JSON
-- [ ] Photo capture/documentation works on a supported device/browser
-- [ ] Install prompt/manifest works where supported
-- [ ] Run `npm ci && npm test`
-
-## Sale representation
-Market as a travel companion PWA / early-stage software asset. Do not promise hotel booking, payment processing, universal PMS or smart-lock integration, or cloud-synced traveler records unless those capabilities are separately implemented and verified.
+## Deploy
+Deploy the `owner-app` branch as its own web service and domain. Use the included Node server and `npm test`. No payment credentials or database secrets are required for the current local-first version.
