@@ -38,7 +38,7 @@ function headers(res, status, contentType) {
   res.writeHead(status, {
     "Content-Type": contentType,
     "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
+    "X-Frame-Options": "ALLOWALL",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Cache-Control": "no-store"
   });
@@ -47,7 +47,7 @@ function reply(res, result) {
   res.writeHead(result.status, {
     "Content-Type": "application/json; charset=utf-8",
     "X-Content-Type-Options": "nosniff",
-    "X-Frame-Options": "DENY",
+    "X-Frame-Options": "ALLOWALL",
     "Cache-Control": "no-store",
     ...(result.headers || {})
   });
@@ -113,7 +113,7 @@ async function handler(req, res) {
     res.writeHead(200, {
       "Content-Type": types[ext] || "application/octet-stream",
       "X-Content-Type-Options": "nosniff",
-      "X-Frame-Options": "DENY",
+      "X-Frame-Options": "ALLOWALL",
       "Cache-Control": ext === ".html" ? "no-cache" : "public, max-age=3600"
     });
     if (req.method === "HEAD") return res.end();

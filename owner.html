@@ -16,4 +16,5 @@ function saveOwnerIdentity(){const name=document.getElementById("ownerName").val
 function skipOwnerIdentity(){localStorage.setItem("hep_owner_identity_skipped","1");document.getElementById("ownerWelcomeSetup").style.display="none"}
 function updateOwnerGreeting(x){let h=document.querySelector(".hero h1");if(h&&x?.name)h.textContent="Welcome, "+x.name+" 👋";let p=document.querySelector(".hero p");if(p&&x?.title)p.textContent=x.title+" workspace · Run what matters without the clutter."}
 loadOwnerIdentity();
-</script></body></html>
+</script><script defer src="/productos-badge.js"></script>
+</body></html>

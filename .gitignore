@@ -5,3 +5,9 @@
 node_modules/
 npm-debug.log*
 .DS_Store
+
+# Leftover Next.js artifact — this repo is a plain Node server, not a Next.js app
+.next/
+
+# ProductOS wiki memory (sandbox-only, not part of the published repo)
+wiki/

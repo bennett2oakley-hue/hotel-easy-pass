@@ -20,4 +20,5 @@ const saved=JSON.parse(localStorage.getItem("hep_traveler")||"null");
 if(saved?.name) location.replace("./traveler.html");
 function start(){const name=document.getElementById("name").value.trim();if(!name){document.getElementById("name").focus();return}localStorage.setItem("hep_traveler",JSON.stringify({name,destination:"",tripType:"",travelers:1,days:1,hotel:"need",rental:"undecided",flight:"undecided",needs:[]}));location.href="./traveler.html";}
 document.getElementById("name").addEventListener("keydown",e=>{if(e.key==="Enter")start()});
-</script></body></html>
+</script><script defer src="/productos-badge.js"></script>
+</body></html>
