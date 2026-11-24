@@ -68,7 +68,7 @@ the feature breakdown and recent-activity list populated.
 Tip calculator: bill `100`, tip `20%`, 1 person → `Tip: $20.00`, `Total: $120.00`,
 `Each: $120.00`. Correct.
 
-## Open issue found during this pass
+## Open issue found during this pass — RESOLVED 2026-11-24
 
 **The tool set is not filtered by trip intent.** The questionnaire adapts its questions,
 but `renderDashboard()` in `main.js` renders the same eight nav sections and the same
@@ -85,3 +85,60 @@ each intent should surface is a product decision that has not been made yet. Fix
 means making the section list in `renderDashboard()` conditional on the stored trip
 profile, and updating the `main.js:163` copy to match whatever that mapping turns out
 to be.
+
+### Resolution
+
+The mapping was decided and shipped on 2026-11-24. `main.js` now holds a data-driven
+`TRIP_TOOL_SETS` map plus a `TOOL_SECTIONS` registry, and `renderDashboard()` composes
+the page from the resolved tool list instead of emitting a fixed set of sections.
+
+| Trip intent | Tools surfaced |
+| --- | --- |
+| Business | Wi-Fi & Printing, Somewhere Quiet to Work, Trip Budget, Tip Calculator |
+| Emergency | Emergency Travel, Directions, Nearby Essentials, Hotel Contact, Tip Calculator |
+| Family | Kids & Family Needs, Family Activities, Travel Checklists |
+| Leisure | Nearby food & attractions, Trip Budget, Travel Marketplace, Travel Checklists, Rewards Wallet |
+
+The navigation is derived from the rendered tools, so no button can point at a section
+that is not on the page. The traveller's stated `needs` promote the tool that answers
+them and add a matching search chip. The welcome panel and the command card are also
+intent-aware, and the questionnaire copy at `main.js:163` now says the dashboard is
+*"built around the tools that fit your trip, not the whole catalogue"* — which is what
+the app actually does.
+
+### Re-verification after the fix
+
+All four intents were driven through the real questionnaire handler path in the browser:
+
+- **Business** — nav `Stay, My Trip, Work, Quiet, Budget, Tip, Owners`; `Wi-Fi & Printing`
+  and `Somewhere Quiet to Work` cards; budget calculated `$165.00` against a `$400` limit;
+  tip on a `$100` bill at `20%` for `2` people returned `Tip: $20.00 / Total: $120.00 / Each: $60.00`.
+  The stated need *"parking"* added a `🅿 Parking` chip to the work card.
+- **Emergency** — nav `Stay, My Trip, Emergency, Directions, Essentials, My Hotel, Tip, Owners`;
+  the Hotel Contact card showed the saved stay (`Reno Grand`, `Room 512`, address, check-in).
+  The stated need *"directions"* promoted Directions to the top.
+- **Family** — nav `Stay, My Trip, Activities, Family, Checklists, Owners`; `Family Activities`
+  and `Kids & Family Needs` cards.
+- **Leisure** — nav `Stay, My Trip, Explore, Budget, Marketplace, Checklists, Rewards, Owners`;
+  checklist toggle, reward add (`Marriott Bonvoy` / `4200` points) and packing add all worked.
+  The stated need *"shopping"* added a `🛍 Shopping` chip to the nearby finder.
+
+Every `scrollToId(...)` target on every intent resolves to a rendered section — no dead
+buttons. No console errors on any intent. `npm test` is green: 4 tests pass, and the new
+smoke-test assertions execute the mapping in a `node:vm` sandbox rather than just
+grepping for it.
+
+### Service worker — deploy staleness found while verifying
+
+`sw.js` was serving the app **cache-first**, and `server.js` sends JS with
+`Cache-Control: public, max-age=3600`. The two together meant a returning traveller
+would keep the previous `main.js` indefinitely — the change above would never have
+reached existing users. A live `hotel-easy-pass-v6` cache was confirmed serving the old
+build in the test browser.
+
+`sw.js` now uses **network first** (`cache: "no-cache"`) for same-origin GETs, falling
+back to the cache when offline, and `CACHE_NAME` was bumped to `v7`. The install snapshot
+also fetches with `cache: "reload"` so the offline fallback is never seeded from a stale
+HTTP-cached build. The server's cache headers were left alone — adding `ETag` /
+`Last-Modified` to `server.js` would let the browser revalidate instead of re-download,
+but that is a server change and out of scope for this step.

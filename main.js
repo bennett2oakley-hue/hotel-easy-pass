@@ -160,7 +160,7 @@ function renderJourneyStep(step){
       <h1>${title}</h1>
       <p class="journey-lead">${body}</p>
       ${html}
-      <p class="journey-ai">Hotel Easy Pass uses your answers to decide what matters next. You won't be shown irrelevant choices.</p>
+      <p class="journey-ai">Hotel Easy Pass uses your answers to decide what matters next. Your dashboard is built around the tools that fit your trip, not the whole catalogue.</p>
     </section>`;
 
   let html="";
@@ -389,6 +389,375 @@ function renderTripIntro(){
     </section>`;
 }
 
+/* ---------- Intent-aware traveller tools ----------
+   The questionnaire already records a trip intent (Business / Emergency / Leisure /
+   Family) and the needs the traveller picked. Each intent maps to the tools that
+   actually apply to it, so a Leisure trip never opens on an emergency panel and an
+   emergency trip never opens on a rewards wallet. */
+
+const TRIP_TOOL_SETS = {
+  Business: ["workSpace", "quietSpace", "budget", "tip"],
+  Emergency: ["emergency", "directions", "essentials", "hotelContact", "tip"],
+  Family: ["familyNeeds", "activities", "checklists"],
+  Leisure: ["nearby", "budget", "marketplace", "checklists", "rewards"]
+};
+
+// Fallback when a stored profile predates trip types: show every tool rather than
+// hiding something the traveller may still need.
+const ALL_TOOL_KEYS = [
+  "nearby", "budget", "marketplace", "checklists", "rewards",
+  "workSpace", "quietSpace", "emergency", "directions", "essentials",
+  "hotelContact", "familyNeeds", "activities", "tip"
+];
+
+// A stated need pulls its tool to the front and adds a search that matches the need.
+const NEED_HINTS = {
+  Business: [
+    { match: "parking", tool: "workSpace", search: ["🅿", "Parking", "parking"] },
+    { match: "dining", tool: "workSpace", search: ["🍽", "Business dining", "business dining"] },
+    { match: "meeting", tool: "workSpace", search: ["📍", "Near my meeting", "conference venue"] },
+    { match: "quiet", tool: "quietSpace" }
+  ],
+  Family: [
+    { match: "breakfast", tool: "familyNeeds", search: ["🍳", "Breakfast", "breakfast"] },
+    { match: "groceries", tool: "familyNeeds", search: ["🛒", "Groceries", "grocery store"] },
+    { match: "kid", tool: "activities" },
+    { match: "transportation", tool: "familyNeeds", search: ["🚗", "Transportation", "car rental"] }
+  ],
+  Leisure: [
+    { match: "shopping", tool: "nearby", search: ["🛍", "Shopping", "shopping"] },
+    { match: "attractions", tool: "nearby", search: ["🎟", "Attractions", "attractions"] },
+    { match: "restaurants", tool: "nearby", search: ["🍽", "Restaurants", "restaurants"] },
+    { match: "adventures", tool: "nearby", search: ["🔥", "Adventures", "adventure activities"] },
+    { match: "transportation", tool: "nearby", search: ["🚗", "Transportation", "car rental"] }
+  ],
+  Emergency: [
+    { match: "transportation", tool: "directions", search: ["🚗", "Transportation", "car rental"] },
+    { match: "directions", tool: "directions" },
+    { match: "emergency help", tool: "emergency" },
+    { match: "essential services", tool: "essentials" }
+  ]
+};
+
+// The steps on the trip command card follow the intent too.
+const COMMAND_STEPS = {
+  Business: ["Save your hotel", "Find printing & Wi-Fi", "Track your budget", "Share the plan"],
+  Emergency: ["Save where you're staying", "Get directions", "Find nearby help", "Share your trip info"],
+  Family: ["Save your hotel", "Find family-friendly food", "Set your checklists", "Share the plan"],
+  Leisure: ["Save your hotel", "Find food & attractions", "Track your budget", "Share the plan"]
+};
+
+// The command card's primary button jumps to the tool that matters most for the intent.
+const COMMAND_CTAS = {
+  Business: { label: "🖨 Work essentials", tool: "workSpace" },
+  Emergency: { label: "📍 Get directions", tool: "directions" },
+  Family: { label: "👨‍👩‍👧 Family essentials", tool: "familyNeeds" },
+  Leisure: { label: "📍 Explore near me", tool: "explore" }
+};
+
+const INTENT_HEADLINES = {
+  Business: "Everything a work trip needs, without the noise.",
+  Emergency: "The help you need, while you need it.",
+  Family: "Everything a family trip needs, on one screen.",
+  Leisure: "Everything you need for a smoother hotel stay."
+};
+
+function renderSearchChips(searches) {
+  if (!searches || !searches.length) return "";
+  return `<div class="chips">${searches.map(s => `<button onclick="quickSearch('${esc(s[2])}')">${s[0]} ${esc(s[1])}</button>`).join("")}</div>`;
+}
+
+const TOOL_SECTIONS = {
+  nearby: {
+    id: "explore",
+    nav: { icon: "📍", label: "Explore" },
+    html: (extra) => `
+      <section class="quick-grid" id="explore">
+        <button onclick="maps('restaurants near me')">🍔<span>Food</span></button>
+        <button onclick="maps('attractions near me')">🎟️<span>Attractions</span></button>
+        <button onclick="maps('grocery stores near me')">🛒<span>Groceries</span></button>
+        <button onclick="maps('gas stations near me')">⛽<span>Gas</span></button>
+        <button onclick="maps('pharmacy near me')">💊<span>Pharmacy</span></button>
+        <button onclick="maps('coffee near me')">☕<span>Coffee</span></button>
+        <button onclick="maps('laundromat near me')">🧺<span>Laundry</span></button>
+        <button onclick="maps('bank ATM near me')">🏧<span>ATM</span></button>
+        <button onclick="maps('urgent care near me')">🩺<span>Urgent Care</span></button>
+      </section>
+
+      <section class="card" id="nearbyFinder">
+        <div class="section-head"><div><span class="kicker">DISCOVER</span><h2>🔎 Nearby Finder</h2></div></div>
+        <p>Search for a place, service, restaurant, attraction or deal and open the results in Maps.</p><div class="popular-searches"><strong>Popular right now</strong><div class="chips"><button onclick="quickSearch('best cheap restaurants')">🍔 Cheap restaurants</button><button onclick="quickSearch('free things to do')">🎟️ Free things to do</button><button onclick="quickSearch('grocery store')">🛒 Groceries</button><button onclick="quickSearch('gas station')">⛽ Gas</button></div></div>
+        <div class="search-row">
+          <input id="dealSearch" placeholder="Try: pizza, museum, discounts, grocery...">
+          <button class="primary" onclick="searchDeals()">Search</button>
+        </div>
+        <div class="chips">
+          <button onclick="quickSearch('cheap eats')">Cheap eats</button>
+          <button onclick="quickSearch('family activities')">Family fun</button>
+          <button onclick="quickSearch('free attractions')">Free attractions</button>
+          <button onclick="quickSearch('hotel discounts')">Hotel deals</button>
+        </div>
+        ${renderSearchChips(extra)}
+      </section>`
+  },
+  budget: {
+    id: "money",
+    nav: { icon: "💰", label: "Budget" },
+    html: () => `
+      <section class="card" id="money">
+        <div class="section-head"><div><span class="kicker">SAVE & TRACK</span><h2>💰 Trip Budget</h2></div></div>
+        <div class="budget-grid">
+          <input id="hotelCost" type="number" min="0" step="0.01" placeholder="Hotel">
+          <input id="foodCost" type="number" min="0" step="0.01" placeholder="Food">
+          <input id="gasCost" type="number" min="0" step="0.01" placeholder="Gas">
+          <input id="funCost" type="number" min="0" step="0.01" placeholder="Activities">
+          <input id="otherCost" type="number" min="0" step="0.01" placeholder="Other">
+          <input id="budgetLimit" type="number" min="0" step="0.01" placeholder="Trip budget limit">
+        </div>
+        <button class="wide primary" onclick="calculateBudget()">Calculate trip cost</button>
+        <div id="budgetResult" class="result"></div>
+      </section>`
+  },
+  marketplace: {
+    id: "marketplace",
+    nav: { icon: "✈️", label: "Marketplace" },
+    html: () => `
+      <section class="card revenue-card" id="marketplace">
+        <div class="section-head"><div><span class="kicker">BOOK & SAVE</span><h2>✈️ Travel Marketplace</h2></div><span class="partner-badge">PARTNER READY</span></div>
+        <p>Compare hotels, activities and travel services. Partner links can be connected here so Hotel Easy Pass can earn when users book.</p>
+        <div class="market-grid">
+          <a class="market-item" data-partner="booking" href="https://www.booking.com/" target="_blank" rel="noopener noreferrer"><strong>🏨 Hotels</strong><small>Find a stay</small></a>
+          <a class="market-item" data-partner="viator" href="https://www.viator.com/" target="_blank" rel="noopener noreferrer"><strong>🎟️ Experiences</strong><small>Things to do</small></a>
+          <a class="market-item" data-partner="skyscanner" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
+          <a class="market-item" data-partner="resortpass" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
+        </div>
+        <button class="wide primary" onclick="scrollToId('stay');trackEvent('marketplace_cta')">🏨 Have a hotel? Build your stay dashboard</button>
+        <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
+      </section>`
+  },
+  checklists: {
+    id: "tools",
+    nav: { icon: "🧳", label: "Checklists" },
+    html: () => `
+      <section class="card" id="tools">
+        <div class="section-head"><div><span class="kicker">READY, SET, GO</span><h2>🧳 Travel Checklists</h2></div></div>
+
+        <div class="tool-block">
+          <h3>✅ Hotel Stay Checklist</h3>
+          <div id="checklist"></div>
+          <button class="secondary wide" onclick="resetChecklist()">Reset checklist</button>
+        </div>
+
+        <div class="tool-block">
+          <h3>🎒 Packing Checklist</h3>
+          <div id="packing"></div>
+          <div class="search-row">
+            <input id="packingItem" placeholder="Add packing item">
+            <button class="primary" onclick="addPacking()">Add</button>
+          </div>
+        </div>
+      </section>`
+  },
+  rewards: {
+    id: "rewardsWallet",
+    nav: { icon: "🎯", label: "Rewards" },
+    html: () => `
+      <section class="card" id="rewardsWallet">
+        <div class="section-head"><div><span class="kicker">REWARDS</span><h2>🎯 Rewards Wallet</h2></div></div>
+        <p>Keep reward balances handy without storing passwords or payment information.</p>
+        <div class="form two">
+          <input id="rewardName" placeholder="Hotel or rewards program">
+          <input id="rewardPoints" type="number" min="0" placeholder="Points">
+        </div>
+        <button class="wide primary" onclick="addReward()">Add Rewards</button>
+        <div id="rewards"></div>
+      </section>`
+  },
+  workSpace: {
+    id: "workSpace",
+    nav: { icon: "🖨", label: "Work" },
+    html: (extra) => `
+      <section class="card" id="workSpace">
+        <div class="section-head"><div><span class="kicker">GET THE JOB DONE</span><h2>🖨 Wi-Fi &amp; Printing</h2></div><span class="partner-badge">BUSINESS</span></div>
+        <p>Printing, a business centre and somewhere with reliable Wi-Fi — all close to your hotel.</p>
+        <div class="chips">
+          <button onclick="quickSearch('printing')">🖨 Printing</button>
+          <button onclick="quickSearch('business center')">🏢 Business centre</button>
+          <button onclick="quickSearch('wifi cafe')">📶 Wi-Fi café</button>
+          <button onclick="quickSearch('coworking space')">💻 Coworking space</button>
+        </div>
+        ${renderSearchChips(extra)}
+        <button class="wide secondary" onclick="scrollToId('stay')">🏨 My hotel details</button>
+      </section>`
+  },
+  quietSpace: {
+    id: "quietSpace",
+    nav: { icon: "🤫", label: "Quiet" },
+    html: (extra) => `
+      <section class="card" id="quietSpace">
+        <div class="section-head"><div><span class="kicker">HEADSPACE</span><h2>🤫 Somewhere Quiet to Work</h2></div><span class="partner-badge">BUSINESS</span></div>
+        <p>Need a call, a deadline or a clear head? These are the places travellers usually try first.</p>
+        <div class="chips">
+          <button onclick="quickSearch('quiet cafe to work in')">☕ Quiet café</button>
+          <button onclick="quickSearch('library')">📚 Library</button>
+          <button onclick="quickSearch('hotel lobby')">🏨 Hotel lobby</button>
+          <button onclick="quickSearch('park')">🌳 Park</button>
+        </div>
+        ${renderSearchChips(extra)}
+      </section>`
+  },
+  emergency: {
+    id: "emergency",
+    nav: { icon: "🆘", label: "Emergency" },
+    html: () => `
+      <section class="card emergency-card" id="emergency">
+        <div class="section-head"><div><span class="kicker">WHEN PLANS GO SIDEWAYS</span><h2>🆘 Emergency Travel</h2></div><span class="partner-badge">HELP FAST</span></div>
+        <p>Life happens. Hotel Easy Pass keeps the important information close so you can focus on getting help instead of figuring out what to do next.</p>
+        <div class="emergency-grid">
+          <a class="emergency-action" href="tel:911" onclick="trackEvent('emergency_911')"><strong>📞 Call 911</strong><span>Emergency services</span></a>
+          <button class="emergency-action" onclick="openEmergencyDirections()"><strong>🏥 Find medical help</strong><span>Search nearby urgent care and hospitals</span></button>
+          <button class="emergency-action" onclick="shareEmergencyInfo()"><strong>📤 Share my trip info</strong><span>Share saved hotel details with someone you trust</span></button>
+          <button class="emergency-action" onclick="scrollToId('stay');trackEvent('emergency_hotel_info')"><strong>🏨 Show my hotel</strong><span>Quick access to your saved stay</span></button>
+        </div>
+        <div class="emergency-note"><strong>Important:</strong> For an immediate emergency, call 911. Hotel Easy Pass is a travel organization tool, not a substitute for emergency services or professional medical care.</div>
+      </section>`
+  },
+  directions: {
+    id: "directions",
+    nav: { icon: "🧭", label: "Directions" },
+    html: (extra) => `
+      <section class="card" id="directions">
+        <div class="section-head"><div><span class="kicker">GET THERE</span><h2>🧭 Directions</h2></div><span class="partner-badge">HELP FAST</span></div>
+        <p>Get from where you are to where you need to be — your hotel, medical care or the nearest pharmacy.</p>
+        <div class="button-row">
+          <button class="primary" onclick="openHotelMap()">🏨 Directions to my hotel</button>
+          <button class="secondary" onclick="maps('hospital near me')">🏥 Nearest hospital</button>
+        </div>
+        <div class="chips">
+          <button onclick="quickSearch('24 hour pharmacy')">💊 24h pharmacy</button>
+          <button onclick="quickSearch('police station')">🚓 Police station</button>
+          <button onclick="quickSearch('car rental')">🚗 Car rental</button>
+          <button onclick="quickSearch('taxi stand')">🚕 Taxi</button>
+        </div>
+        ${renderSearchChips(extra)}
+      </section>`
+  },
+  essentials: {
+    id: "essentials",
+    nav: { icon: "🚨", label: "Essentials" },
+    html: () => `
+      <section class="card emergency" id="essentials">
+        <span class="kicker">QUICK HELP</span>
+        <h2>🚨 Nearby Essentials</h2>
+        <p>Open local results for important services.</p>
+        <div class="essential-grid">
+          <button onclick="maps('hospital near me')">🏥 Hospital</button>
+          <button onclick="maps('urgent care near me')">🩺 Urgent Care</button>
+          <button onclick="maps('police station near me')">🚓 Police</button>
+          <button onclick="maps('24 hour pharmacy near me')">💊 Pharmacy</button>
+        </div>
+        <a class="call911" href="tel:911">Emergency: 911</a>
+      </section>`
+  },
+  hotelContact: {
+    id: "hotelContact",
+    nav: { icon: "🏨", label: "My Hotel" },
+    html: () => {
+      const h = state.hotel || {};
+      const saved = Boolean(h.name || h.address || h.room);
+      const checkIn = h.checkIn && !Number.isNaN(new Date(h.checkIn).getTime())
+        ? `<small>🕐 Check-in ${esc(new Date(h.checkIn).toLocaleString())}</small>` : "";
+      return `
+      <section class="card" id="hotelContact">
+        <div class="section-head"><div><span class="kicker">YOUR HOST</span><h2>🏨 Hotel Contact</h2></div><span class="partner-badge">${saved ? "SAVED" : "NOT SAVED"}</span></div>
+        ${saved ? `
+        <div class="stay-summary" id="hotelContactSummary">
+          <div><strong>${esc(h.name || "Hotel stay")}</strong>${h.room ? ` <span class="room">Room ${esc(h.room)}</span>` : ""}</div>
+          ${h.address ? `<small>📍 ${esc(h.address)}</small>` : `<small class="muted">No address saved yet.</small>`}
+          ${checkIn}
+        </div>` : `<p class="muted">Save your hotel details and they will be here when you need to tell someone where you are staying.</p>`}
+        <div class="button-row">
+          <button class="primary" onclick="scrollToId('stay')">🏨 ${saved ? "Edit stay details" : "Save my hotel"}</button>
+          <button class="secondary" onclick="openHotelMap()">📍 Directions</button>
+          <button class="secondary" onclick="shareEmergencyInfo()">📤 Share my trip info</button>
+        </div>
+      </section>`;
+    }
+  },
+  familyNeeds: {
+    id: "familyNeeds",
+    nav: { icon: "👨‍👩‍👧", label: "Family" },
+    html: (extra) => `
+      <section class="card" id="familyNeeds">
+        <div class="section-head"><div><span class="kicker">EVERYBODY LOOKS AFTER</span><h2>👨‍👩‍👧 Kids &amp; Family Needs</h2></div><span class="partner-badge">FAMILY</span></div>
+        <p>Food the kids will eat, supplies for the room, and somewhere to burn energy before dinner.</p>
+        <div class="essential-grid">
+          <button onclick="quickSearch('kid friendly restaurant')">🍽 Kid-friendly food</button>
+          <button onclick="quickSearch('grocery store')">🛒 Groceries</button>
+          <button onclick="quickSearch('pharmacy')">💊 Pharmacy</button>
+          <button onclick="quickSearch('playground')">🛝 Playground</button>
+        </div>
+        ${renderSearchChips(extra)}
+      </section>`
+  },
+  activities: {
+    id: "activities",
+    nav: { icon: "🎢", label: "Activities" },
+    html: (extra) => `
+      <section class="card" id="activities">
+        <div class="section-head"><div><span class="kicker">MAKE A DAY OF IT</span><h2>🎢 Family Activities</h2></div><span class="partner-badge">FAMILY</span></div>
+        <p>Things to do together, from a quick stop on the way to somewhere that fills the whole day.</p>
+        <div class="essential-grid">
+          <button onclick="quickSearch('family activities')">🎪 Family activities</button>
+          <button onclick="quickSearch('zoo')">🦁 Zoo</button>
+          <button onclick="quickSearch('aquarium')">🐠 Aquarium</button>
+          <button onclick="quickSearch('movie theater')">🎬 Movie theater</button>
+        </div>
+        ${renderSearchChips(extra)}
+      </section>`
+  },
+  tip: {
+    id: "tip",
+    nav: { icon: "💵", label: "Tip" },
+    html: () => `
+      <section class="card" id="tip">
+        <div class="section-head"><div><span class="kicker">READY, SET, GO</span><h2>💵 Tip Calculator</h2></div></div>
+        <div class="tool-block">
+          <div class="budget-grid">
+            <input id="tipBill" type="number" min="0" step="0.01" placeholder="Bill amount">
+            <input id="tipPercent" type="number" min="0" step="1" value="20" placeholder="Tip %">
+            <input id="tipPeople" type="number" min="1" step="1" value="1" placeholder="People">
+          </div>
+          <button class="wide primary" onclick="calculateTip()">Calculate tip</button>
+          <div id="tipResult" class="result"></div>
+        </div>
+      </section>`
+  }
+};
+
+// Resolve the stored trip profile into the ordered list of tools to render.
+function resolveTripTools() {
+  const t = state.traveler || {};
+  const type = t.tripType || "";
+  const keys = (TRIP_TOOL_SETS[type] || ALL_TOOL_KEYS).slice();
+  const hints = NEED_HINTS[type] || [];
+  const needs = (Array.isArray(t.needs) ? t.needs : []).map(n => String(n || "").toLowerCase());
+  const searches = {};
+  const matched = [];
+  for (const hint of hints) {
+    if (!needs.some(need => need.includes(hint.match))) continue;
+    if (!keys.includes(hint.tool)) keys.push(hint.tool);
+    if (!matched.includes(hint.tool)) matched.push(hint.tool);
+    if (hint.search) {
+      if (!searches[hint.tool]) searches[hint.tool] = [];
+      if (!searches[hint.tool].some(s => s[2] === hint.search[2])) searches[hint.tool].push(hint.search);
+    }
+  }
+  // Tools that answer a stated need come first; the rest keep their configured order.
+  const ordered = matched.concat(keys.filter(key => !matched.includes(key)));
+  return { type, keys: ordered.filter(key => TOOL_SECTIONS[key]), searches };
+}
+
 function renderDashboard() {
   trackEvent("app_open");
   const checklist = state.checklist.length ? state.checklist : defaultChecklist.map(text => ({ text, done: false }));
@@ -398,6 +767,24 @@ function renderDashboard() {
   persist();
 
   const tripIntro=renderTripIntro();
+  const plan=resolveTripTools();
+  const tools=plan.keys.map(key=>({ key, def:TOOL_SECTIONS[key] })).filter(item=>item.def);
+  const toolSections=tools.map(item=>item.def.html(plan.searches[item.key])).join("");
+  const tripType=plan.type;
+  const toolLabels=tools.map(item=>item.def.nav.label.toLowerCase());
+  const navItems=[
+    { id:"stay", icon:"🏨", label:"Stay" },
+    { id:"myTrip", icon:"🧭", label:"My Trip" },
+    ...tools.map(item=>({ id:item.def.id, icon:item.def.nav.icon, label:item.def.nav.label })),
+    { id:"owners", icon:"🏨", label:"Owners" }
+  ];
+  const toolkitBadge=tripType?`${esc(tripType.toUpperCase())} TRIP TOOLKIT`:"ALL-IN-ONE TRAVEL TOOLKIT";
+  const toolkitHeadline=INTENT_HEADLINES[tripType]||INTENT_HEADLINES.Leisure;
+  const toolkitSummary=tripType
+    ? `Your ${esc(tripType.toLowerCase())} trip shows: ${toolLabels.join(", ")}. Your stay details, trip notes and summary stay on this page too.`
+    : "Keep your stay details, nearby essentials, rewards, notes, budget and travel checklists together on your phone.";
+  const commandSteps=COMMAND_STEPS[tripType]||COMMAND_STEPS.Leisure;
+  const commandCta=COMMAND_CTAS[tripType]||COMMAND_CTAS.Leisure;
   document.getElementById("app").innerHTML = `
     <div class="hep">
       ${tripIntro}
@@ -411,21 +798,14 @@ function renderDashboard() {
       </header>
 
       <nav class="nav" aria-label="Main navigation">
-        <button onclick="scrollToId('stay')">🏨 Stay</button>
-        <button onclick="scrollToId('myTrip')">🧭 My Trip</button>
-        <button onclick="scrollToId('owners')">🏨 Owners</button>
-        <button onclick="scrollToId('hotel-branding')">🎨 Hotel Branding</button>
-        <button onclick="scrollToId('emergency')">🆘 Emergency</button>
-        <button onclick="scrollToId('explore')">📍 Explore</button>
-        <button onclick="scrollToId('money')">💰 Money</button>
-        <button onclick="scrollToId('tools')">🧳 Tools</button>
+        ${navItems.map(item=>`<button onclick="scrollToId('${item.id}')">${item.icon} ${item.label}</button>`).join("")}
       </nav>
 
       <section class="welcome">
         <div>
-          <span class="badge">ALL-IN-ONE TRAVEL TOOLKIT</span>
-          <h2>Everything you need for a smoother hotel stay.</h2>
-          <p>Keep your stay details, nearby essentials, rewards, notes, budget and travel checklists together on your phone.</p>
+          <span class="badge">${toolkitBadge}</span>
+          <h2>${toolkitHeadline}</h2>
+          <p>${toolkitSummary}</p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" onclick="scrollToId('stay')">🏨 Start My Stay</button><button class="secondary" onclick="shareApp()">↗ Share</button><button id="installAppBtn" class="secondary" style="display:none" onclick="installApp()">📲 Install App</button></div>
       </section>
@@ -459,68 +839,39 @@ function renderDashboard() {
         <div class="room-documentation"><div class="section-head"><div><span class="kicker">ROOM DOCUMENTATION</span><h3>📸 Check-In & Check-Out Photos</h3></div><span class="partner-badge">PRIVATE ON DEVICE</span></div><p>Take photos when you arrive and again before you leave. Document existing damage, cleanliness or anything you want to remember.</p><div class="room-photo-box"><strong>📥 Check-in</strong><input id="checkInPhotos" type="file" accept="image/*" capture="environment" multiple><input id="checkInPhotoNote" placeholder="Optional note: scratch on desk, stained towel, etc."><button class="secondary wide" onclick="saveRoomPhotoSet('check-in')">Save Check-In Photos</button></div><div class="room-photo-box"><strong>📤 Check-out</strong><input id="checkOutPhotos" type="file" accept="image/*" capture="environment" multiple><input id="checkOutPhotoNote" placeholder="Optional note about room condition at checkout"><button class="secondary wide" onclick="saveRoomPhotoSet('check-out')">Save Check-Out Photos</button></div><div id="roomPhotoLog" class="room-photo-log"></div><small class="muted">Photos stay in this browser and are not uploaded by Hotel Easy Pass. Follow the hotel's normal process for reporting damage or disputes.</small></div>
       </section>
 
-      <section class="quick-grid" id="explore">
-        <button onclick="maps('restaurants near me')">🍔<span>Food</span></button>
-        <button onclick="maps('attractions near me')">🎟️<span>Attractions</span></button>
-        <button onclick="maps('grocery stores near me')">🛒<span>Groceries</span></button>
-        <button onclick="maps('gas stations near me')">⛽<span>Gas</span></button>
-        <button onclick="maps('pharmacy near me')">💊<span>Pharmacy</span></button>
-        <button onclick="maps('coffee near me')">☕<span>Coffee</span></button>
-        <button onclick="maps('laundromat near me')">🧺<span>Laundry</span></button>
-        <button onclick="maps('bank ATM near me')">🏧<span>ATM</span></button>
-        <button onclick="maps('urgent care near me')">🩺<span>Urgent Care</span></button>
+
+      ${toolSections}
+
+      <section class="card trip-command" id="command">
+        <div class="section-head"><div><span class="kicker">YOUR TRIP, AT A GLANCE</span><h2>🧭 Trip Command Center</h2></div></div>
+        <div class="command-grid">
+          ${commandSteps.map((step,index)=>`<div><strong>${index+1}</strong><span>${esc(step)}</span></div>`).join("")}
+        </div>
+        <button class="wide primary" onclick="scrollToId('${commandCta.tool}');trackEvent('command_cta')">${commandCta.label}</button>
+        <button class="wide secondary" onclick="scrollToId('specials');trackEvent('specials_cta')">🔥 See hotel specials</button>
+        <button class="wide ghost" onclick="scrollToId('owners');trackEvent('owner_hub_cta')">🏨 I'm a hotel owner</button>
+      </section>
+
+      <section class="card my-trip" id="myTrip">
+        <div class="section-head"><div><span class="kicker">YOUR LIVE TRIP</span><h2>🧭 My Trip</h2></div><span id="tripStatusBadge" class="partner-badge">READY</span></div>
+        <div id="myTripSummary" class="my-trip-summary"></div>
+        <div class="trip-actions">
+          <button class="primary" onclick="openHotelMap()">📍 Open Hotel</button>
+          <button class="secondary" onclick="shareTrip()">↗ Share Trip</button>
+        </div>
+        <div class="trip-stats">
+          <div><strong id="tripBudgetStat">$0</strong><span>trip spend</span></div>
+          <div><strong id="tripPackingStat">0%</strong><span>packed</span></div>
+          <div><strong id="tripNotesStat">0</strong><span>notes</span></div>
+        </div>
+        <button class="ghost wide" onclick="startAnotherTrip()">＋ Start another trip</button>
       </section>
 
       <section class="card">
-        <div class="section-head"><div><span class="kicker">DISCOVER</span><h2>🔎 Nearby Finder</h2></div></div>
-        <p>Search for a place, service, restaurant, attraction or deal and open the results in Maps.</p><div class="popular-searches"><strong>Popular right now</strong><div class="chips"><button onclick="quickSearch('best cheap restaurants')">🍔 Cheap restaurants</button><button onclick="quickSearch('free things to do')">🎟️ Free things to do</button><button onclick="quickSearch('grocery store')">🛒 Groceries</button><button onclick="quickSearch('gas station')">⛽ Gas</button></div></div>
-        <div class="search-row">
-          <input id="dealSearch" placeholder="Try: pizza, museum, discounts, grocery...">
-          <button class="primary" onclick="searchDeals()">Search</button>
-        </div>
-        <div class="chips">
-          <button onclick="quickSearch('cheap eats')">Cheap eats</button>
-          <button onclick="quickSearch('family activities')">Family fun</button>
-          <button onclick="quickSearch('free attractions')">Free attractions</button>
-          <button onclick="quickSearch('hotel discounts')">Hotel deals</button>
-        </div>
-      </section>
-
-      <section class="card revenue-card">
-        <div class="section-head"><div><span class="kicker">BOOK & SAVE</span><h2>✈️ Travel Marketplace</h2></div><span class="partner-badge">PARTNER READY</span></div>
-        <p>Compare hotels, activities and travel services. Partner links can be connected here so Hotel Easy Pass can earn when users book.</p>
-        <div class="market-grid">
-          <a class="market-item" data-partner="booking" href="https://www.booking.com/" target="_blank" rel="noopener noreferrer"><strong>🏨 Hotels</strong><small>Find a stay</small></a>
-          <a class="market-item" data-partner="viator" href="https://www.viator.com/" target="_blank" rel="noopener noreferrer"><strong>🎟️ Experiences</strong><small>Things to do</small></a>
-          <a class="market-item" data-partner="skyscanner" href="https://www.skyscanner.com/" target="_blank" rel="noopener noreferrer"><strong>✈️ Flights</strong><small>Compare flights</small></a>
-          <a class="market-item" data-partner="resortpass" href="https://www.resortpass.com/" target="_blank" rel="noopener noreferrer"><strong>🏖️ Day Passes</strong><small>Hotels & pools</small></a>
-        </div>
-        <button class="wide primary" onclick="scrollToId('stay');trackEvent('marketplace_cta')">🏨 Have a hotel? Build your stay dashboard</button>
-        <div class="affiliate-note"><strong>Affiliate disclosure:</strong> These are ordinary outbound links until approved partner tracking is connected. If an affiliate relationship is activated later, Hotel Easy Pass may earn a commission on qualifying bookings at no extra cost to you. Prices are set by the partner.</div>
-      </section>
-
-      <section class="card brand-ready-card" id="hotel-branding">
-        <div class="section-head"><div><span class="kicker">COMING LATER</span><h2>🎨 Hotel Branding Studio</h2></div><span class="partner-badge">BRAND READY</span></div>
-        <p>We are leaving room for each participating hotel to build a branded guest experience inside Hotel Easy Pass.</p>
-        <div class="brand-roadmap">
-          <div><strong>🏨 Property identity</strong><span>Hotel logo, name, colors and imagery</span></div>
-          <div><strong>✨ Branded specials</strong><span>Promotions styled for each property</span></div>
-          <div><strong>🗺️ Guest experience</strong><span>Property-specific directions, amenities and local recommendations</span></div>
-          <div><strong>🔗 Direct booking</strong><span>Future booking and campaign links</span></div>
-        </div>
-        <div class="specials-note"><strong>Built with room to grow:</strong> the current app keeps the traveler experience separate from future hotel branding, so individual properties can be added without redesigning the whole platform.</div>
-      </section>
-
-      <section class="card emergency-card" id="emergency">
-        <div class="section-head"><div><span class="kicker">WHEN PLANS GO SIDEWAYS</span><h2>🆘 Emergency Travel</h2></div><span class="partner-badge">HELP FAST</span></div>
-        <p>Life happens. Hotel Easy Pass keeps the important information close so you can focus on getting help instead of figuring out what to do next.</p>
-        <div class="emergency-grid">
-          <a class="emergency-action" href="tel:911" onclick="trackEvent('emergency_911')"><strong>📞 Call 911</strong><span>Emergency services</span></a>
-          <button class="emergency-action" onclick="openEmergencyDirections()"><strong>🏥 Find medical help</strong><span>Search nearby urgent care and hospitals</span></button>
-          <button class="emergency-action" onclick="shareEmergencyInfo()"><strong>📤 Share my trip info</strong><span>Share saved hotel details with someone you trust</span></button>
-          <button class="emergency-action" onclick="scrollToId('stay');trackEvent('emergency_hotel_info')"><strong>🏨 Show my hotel</strong><span>Quick access to your saved stay</span></button>
-        </div>
-        <div class="emergency-note"><strong>Important:</strong> For an immediate emergency, call 911. Hotel Easy Pass is a travel organization tool, not a substitute for emergency services or professional medical care.</div>
+        <div class="section-head"><div><span class="kicker">MEMORY BANK</span><h2>📝 Trip Notes</h2></div></div>
+        <textarea id="noteText" placeholder="Save directions, plans, reminders, check-in details or anything you don't want to forget..."></textarea>
+        <button class="wide primary" onclick="addNote()">Save Note</button>
+        <div id="notes"></div>
       </section>
 
       <section class="card owner-card" id="owners">
@@ -553,107 +904,16 @@ function renderDashboard() {
         <div class="specials-note"><strong>For hotel owners & operators:</strong> Want your promotion featured? Add your offer details through the partner program when this marketplace is connected to live hotel partners.</div>
       </section>
 
-      <section class="card trip-command" id="command">
-        <div class="section-head"><div><span class="kicker">YOUR TRIP, AT A GLANCE</span><h2>🧭 Trip Command Center</h2></div></div>
-        <div class="command-grid">
-          <div><strong>1</strong><span>Save your hotel</span></div>
-          <div><strong>2</strong><span>Find nearby essentials</span></div>
-          <div><strong>3</strong><span>Track your budget</span></div>
-          <div><strong>4</strong><span>Share the plan</span></div>
+      <section class="card brand-ready-card" id="hotel-branding">
+        <div class="section-head"><div><span class="kicker">COMING LATER</span><h2>🎨 Hotel Branding Studio</h2></div><span class="partner-badge">BRAND READY</span></div>
+        <p>We are leaving room for each participating hotel to build a branded guest experience inside Hotel Easy Pass.</p>
+        <div class="brand-roadmap">
+          <div><strong>🏨 Property identity</strong><span>Hotel logo, name, colors and imagery</span></div>
+          <div><strong>✨ Branded specials</strong><span>Promotions styled for each property</span></div>
+          <div><strong>🗺️ Guest experience</strong><span>Property-specific directions, amenities and local recommendations</span></div>
+          <div><strong>🔗 Direct booking</strong><span>Future booking and campaign links</span></div>
         </div>
-        <button class="wide primary" onclick="scrollToId('explore');trackEvent('command_cta')">📍 Explore near me</button>
-        <button class="wide secondary" onclick="scrollToId('specials');trackEvent('specials_cta')">🔥 See hotel specials</button>
-        <button class="wide ghost" onclick="scrollToId('owners');trackEvent('owner_hub_cta')">🏨 I'm a hotel owner</button>
-      </section>
-
-      <section class="card my-trip" id="myTrip">
-        <div class="section-head"><div><span class="kicker">YOUR LIVE TRIP</span><h2>🧭 My Trip</h2></div><span id="tripStatusBadge" class="partner-badge">READY</span></div>
-        <div id="myTripSummary" class="my-trip-summary"></div>
-        <div class="trip-actions">
-          <button class="primary" onclick="openHotelMap()">📍 Open Hotel</button>
-          <button class="secondary" onclick="shareTrip()">↗ Share Trip</button>
-        </div>
-        <div class="trip-stats">
-          <div><strong id="tripBudgetStat">$0</strong><span>trip spend</span></div>
-          <div><strong id="tripPackingStat">0%</strong><span>packed</span></div>
-          <div><strong id="tripNotesStat">0</strong><span>notes</span></div>
-        </div>
-        <button class="ghost wide" onclick="startAnotherTrip()">＋ Start another trip</button>
-      </section>
-
-      <section class="card" id="money">
-        <div class="section-head"><div><span class="kicker">SAVE & TRACK</span><h2>💰 Trip Budget</h2></div></div>
-        <div class="budget-grid">
-          <input id="hotelCost" type="number" min="0" step="0.01" placeholder="Hotel">
-          <input id="foodCost" type="number" min="0" step="0.01" placeholder="Food">
-          <input id="gasCost" type="number" min="0" step="0.01" placeholder="Gas">
-          <input id="funCost" type="number" min="0" step="0.01" placeholder="Activities">
-          <input id="otherCost" type="number" min="0" step="0.01" placeholder="Other">
-          <input id="budgetLimit" type="number" min="0" step="0.01" placeholder="Trip budget limit">
-        </div>
-        <button class="wide primary" onclick="calculateBudget()">Calculate trip cost</button>
-        <div id="budgetResult" class="result"></div>
-      </section>
-
-      <section class="card">
-        <div class="section-head"><div><span class="kicker">REWARDS</span><h2>🎯 Rewards Wallet</h2></div></div>
-        <p>Keep reward balances handy without storing passwords or payment information.</p>
-        <div class="form two">
-          <input id="rewardName" placeholder="Hotel or rewards program">
-          <input id="rewardPoints" type="number" min="0" placeholder="Points">
-        </div>
-        <button class="wide primary" onclick="addReward()">Add Rewards</button>
-        <div id="rewards"></div>
-      </section>
-
-      <section class="card" id="tools">
-        <div class="section-head"><div><span class="kicker">READY, SET, GO</span><h2>🧳 Travel Tools</h2></div></div>
-
-        <div class="tool-block">
-          <h3>✅ Hotel Stay Checklist</h3>
-          <div id="checklist"></div>
-          <button class="secondary wide" onclick="resetChecklist()">Reset checklist</button>
-        </div>
-
-        <div class="tool-block">
-          <h3>🎒 Packing Checklist</h3>
-          <div id="packing"></div>
-          <div class="search-row">
-            <input id="packingItem" placeholder="Add packing item">
-            <button class="primary" onclick="addPacking()">Add</button>
-          </div>
-        </div>
-
-        <div class="tool-block">
-          <h3>💵 Tip Calculator</h3>
-          <div class="budget-grid">
-            <input id="tipBill" type="number" min="0" step="0.01" placeholder="Bill amount">
-            <input id="tipPercent" type="number" min="0" step="1" value="20" placeholder="Tip %">
-            <input id="tipPeople" type="number" min="1" step="1" value="1" placeholder="People">
-          </div>
-          <button class="wide primary" onclick="calculateTip()">Calculate tip</button>
-          <div id="tipResult" class="result"></div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="section-head"><div><span class="kicker">MEMORY BANK</span><h2>📝 Trip Notes</h2></div></div>
-        <textarea id="noteText" placeholder="Save directions, plans, reminders, check-in details or anything you don't want to forget..."></textarea>
-        <button class="wide primary" onclick="addNote()">Save Note</button>
-        <div id="notes"></div>
-      </section>
-
-      <section class="card emergency">
-        <span class="kicker">QUICK HELP</span>
-        <h2>🚨 Nearby Essentials</h2>
-        <p>Open local results for important services.</p>
-        <div class="essential-grid">
-          <button onclick="maps('hospital near me')">🏥 Hospital</button>
-          <button onclick="maps('urgent care near me')">🩺 Urgent Care</button>
-          <button onclick="maps('police station near me')">🚓 Police</button>
-          <button onclick="maps('24 hour pharmacy near me')">💊 Pharmacy</button>
-        </div>
-        <a class="call911" href="tel:911">Emergency: 911</a>
+        <div class="specials-note"><strong>Built with room to grow:</strong> the current app keeps the traveler experience separate from future hotel branding, so individual properties can be added without redesigning the whole platform.</div>
       </section>
 
       <footer>
@@ -884,6 +1144,7 @@ function openHotelMap() {
 
 function renderStaySummary() {
   const box = document.getElementById("staySummary");
+  if (!box) return;
   const h = state.hotel;
   if (!h.name && !h.address && !h.checkIn && !h.checkOut) {
     box.innerHTML = '<span class="muted">Add your hotel details above to create your stay dashboard.</span>';
@@ -901,11 +1162,14 @@ function quickSearch(term) { trackEvent("nearby_search", { term }); maps(term + 
 
 function searchDeals() {
   trackEvent("deal_search");
-  const value = document.getElementById("dealSearch").value.trim();
+  const input = document.getElementById("dealSearch");
+  if (!input) return;
+  const value = input.value.trim();
   maps(value ? value + " near me" : "deals near me");
 }
 
 function addReward() { trackEvent("reward_added");
+  if (!document.getElementById("rewardName")) return;
   const name = document.getElementById("rewardName").value.trim();
   if (!name) return;
   state.rewards.push({ name, points: document.getElementById("rewardPoints").value || "0" });
@@ -919,6 +1183,7 @@ function deleteReward(index) { state.rewards.splice(index, 1); persist(); render
 
 function renderRewards() {
   const box = document.getElementById("rewards");
+  if (!box) return;
   if (!state.rewards.length) { box.innerHTML = '<p class="empty">No rewards added yet.</p>'; return; }
   box.innerHTML = state.rewards.map((item, index) => `
     <div class="saved-item"><div><strong>${esc(item.name)}</strong><small>${esc(item.points)} points</small></div>
@@ -938,6 +1203,7 @@ function deleteNote(index) { state.notes.splice(index, 1); persist(); renderNote
 
 function renderNotes() {
   const box = document.getElementById("notes");
+  if (!box) return;
   if (!state.notes.length) { box.innerHTML = '<p class="empty">No trip notes saved yet.</p>'; return; }
   box.innerHTML = state.notes.map((item, index) => `
     <div class="saved-item note"><div><small>${esc(item.date)}</small><p>${esc(item.text)}</p></div>
@@ -945,6 +1211,7 @@ function renderNotes() {
 }
 
 function calculateBudget() { trackEvent("budget_calculated");
+  if (!document.getElementById("budgetResult")) return;
   const fields = ["hotelCost","foodCost","gasCost","funCost","otherCost"];
   const total = fields.reduce((sum, id) => sum + (Number(document.getElementById(id).value) || 0), 0);
   const limit = Number(document.getElementById("budgetLimit").value) || 0;
@@ -957,6 +1224,7 @@ function calculateBudget() { trackEvent("budget_calculated");
 }
 
 function calculateTip() { trackEvent("tip_calculated");
+  if (!document.getElementById("tipResult")) return;
   const bill = Number(document.getElementById("tipBill").value) || 0;
   const percent = Number(document.getElementById("tipPercent").value) || 0;
   const people = Math.max(1, Number(document.getElementById("tipPeople").value) || 1);
@@ -969,6 +1237,7 @@ function toggleCheck(index) { state.checklist[index].done = !state.checklist[ind
 
 function renderChecklist() {
   const box = document.getElementById("checklist");
+  if (!box) return;
   box.innerHTML = state.checklist.map((item, index) => `
     <label class="check ${item.done ? "done" : ""}"><input type="checkbox" ${item.done ? "checked" : ""} onchange="toggleCheck(${index})"> ${esc(item.text)}</label>
   `).join("");
@@ -978,6 +1247,7 @@ function resetChecklist() { state.checklist = defaultChecklist.map(text => ({ te
 
 function addPacking() { trackEvent("packing_item_added");
   const input = document.getElementById("packingItem");
+  if (!input) return;
   const text = input.value.trim();
   if (!text) return;
   state.packing.push({ text, done: false });
@@ -992,6 +1262,7 @@ function deletePacking(index) { state.packing.splice(index, 1); persist(); rende
 
 function renderPacking() {
   const box = document.getElementById("packing");
+  if (!box) return;
   box.innerHTML = state.packing.map((item, index) => `
     <div class="packing-row"><label class="check ${item.done ? "done" : ""}"><input type="checkbox" ${item.done ? "checked" : ""} onchange="togglePacking(${index})"> ${esc(item.text)}</label>
     <button class="delete" onclick="deletePacking(${index})">×</button></div>`).join("");
