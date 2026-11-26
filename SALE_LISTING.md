@@ -61,8 +61,11 @@ A buyer can build revenue through hotel partner programs, affiliate travel offer
 - Analytics dashboard: https://hotel-easy-pass.onrender.com/dashboard.html
 - Repository: https://github.com/bennett2oakley-hue/hotel-easy-pass
 
-## Quality evidence — 2026-11-20
-The latest GitHub Actions run for source commit `0dc333fecff9f1870518b2f31a5c7dc958806a8f` completed successfully: smoke tests passed, validation passed, the clean sale package was built, and the GitHub Pages deployment workflow completed. The Render URL has not been independently browser-verified in this audit. Physical-device camera and photo-permission acceptance remains a buyer handoff check.
+## Quality evidence — 2026-11-26
+
+The latest GitHub Actions test, validation, and sale-package workflows passed: [tests](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124242), [validation](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124395), and [package](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124202).
+
+A read-only browser audit loaded the traveler entry, traveler flow, owner hub, and analytics dashboard on the public Render demo without observed browser console/runtime errors. This did not verify live database persistence, payment processing, real hotel bookings, or provider integrations. Physical-device camera/photo permission checks remain a buyer acceptance item. See [current QA evidence](docs/CURRENT_QA_EVIDENCE.md) for scope and limitations.
 
 ## Business Status and Important Disclosures
 Hotel Easy Pass is a **pre-revenue software asset / working PWA**, not an established revenue-generating business. No verified revenue, customers, profit, traffic, retention, hotel partnerships or recurring subscription revenue are included in this sale.
