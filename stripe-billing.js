@@ -102,7 +102,11 @@ async function supabaseAdmin(path, options) {
     ...options,
     headers: { apikey: key, Authorization: "Bearer " + key, "Content-Type": "application/json", ...(options?.headers || {}) }
   });
-  if (!response.ok) throw new Error("Supabase write failed (" + response.status + "): " + (await response.text()).slice(0, 300));
+  if (!response.ok) throw new Error("Supabase request failed (" + response.status + "): " + (await response.text()).slice(0, 300));
+  if (response.status === 204) return null;
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.toLowerCase().includes("application/json")) return null;
+  return response.json().catch(() => null);
 }
 async function fulfillSession(session) {
   const metadata = session.metadata || {};
