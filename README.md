@@ -53,7 +53,7 @@ Hotel Easy Pass includes browser-local product analytics. Lightweight events are
 - Automated smoke test: `npm test`
 - GitHub Actions CI
 - Locked npm dependency metadata
-- GitHub Pages deployment workflow
+- Optional manual GitHub Pages deployment workflow (Render remains the primary live demo)
 - Vercel-compatible configuration
 - Netlify configuration
 - Nginx/Docker deployment option
