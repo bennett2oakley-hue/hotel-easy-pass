@@ -166,3 +166,7 @@ The audit did not sign in, configure billing, create real bookings, submit payme
 ## Remaining release limitations
 
 The public browser audit did not verify live Supabase account creation, database persistence, Stripe checkout, webhook fulfillment, refunds, disputes, or real owner-side cloud writes. The prior sandbox QA found billing configuration absent there. The buyer must configure their own Supabase and Stripe credentials and run provider test-mode acceptance before enabling paid access. Treat Hotel Easy Pass as a working client-side PWA and early-stage software asset, not a fully integrated hotel booking or payments platform.
+
+## Checkout retry protection — 2026-11-26
+
+The server now attaches a Stripe idempotency key to unlock checkout requests, scoped to the account and a five-minute window. A regression test verifies that repeated requests in the same window reuse the same key. This reduces duplicate Checkout Session creation on repeated submissions. Live Stripe checkout and webhook fulfillment remain unverified until buyer-owned Stripe/Supabase credentials are configured.
