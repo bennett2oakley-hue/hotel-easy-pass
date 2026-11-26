@@ -47,10 +47,10 @@ async function supabaseUser(token) {
   const user = await response.json().catch(() => null);
   return user && UUID_RE.test(user.id || "") ? user : null;
 }
-async function stripe(path, method, params) {
+async function stripe(path, method, params, idempotencyKey) {
   const response = await fetch("https://api.stripe.com/v1/" + path, {
     method: method || "GET",
-    headers: { Authorization: "Bearer " + process.env.STRIPE_SECRET_KEY, ...(params ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) },
+    headers: { Authorization: "Bearer " + process.env.STRIPE_SECRET_KEY, ...(params ? { "Content-Type": "application/x-www-form-urlencoded" } : {}), ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}) },
     ...(params ? { body: params.toString() } : {})
   });
   const data = await response.json().catch(() => ({}));
@@ -88,7 +88,8 @@ async function createCheckout(req) {
   params.set("payment_intent_data[metadata][plan]", "lifetime");
   params.set("allow_promotion_codes", "true");
   try {
-    const session = await stripe("checkout/sessions", "POST", params);
+    const idempotencyWindow = Math.floor(Date.now() / 300000);
+    const session = await stripe("checkout/sessions", "POST", params, "hep-unlock-" + user.id + "-" + idempotencyWindow);
     return session.url ? json(200, { ok: true, url: session.url }) : json(502, { ok: false, error: "Stripe did not return a checkout URL." });
   } catch (error) {
     console.error("Hotel Easy Pass checkout failed:", error.message);
