@@ -63,7 +63,7 @@ A buyer can build revenue through hotel partner programs, affiliate travel offer
 
 ## Quality evidence — 2026-11-26
 
-The latest GitHub Actions test, validation, and sale-package workflows passed: [tests](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124242), [validation](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124395), and [package](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124202).
+The latest GitHub Actions test workflow passed 6 tests with 0 failures; validation and sale-package workflows also passed: [tests](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124242), [validation](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124395), and [package](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124202).
 
 A read-only browser audit loaded the traveler entry, traveler flow, owner hub, and analytics dashboard on the public Render demo without observed browser console/runtime errors. This did not verify live database persistence, payment processing, real hotel bookings, or provider integrations. Physical-device camera/photo permission checks remain a buyer acceptance item. See [current QA evidence](docs/CURRENT_QA_EVIDENCE.md) for scope and limitations.
 
