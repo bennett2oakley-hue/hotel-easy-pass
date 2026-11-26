@@ -142,3 +142,27 @@ also fetches with `cache: "reload"` so the offline fallback is never seeded from
 HTTP-cached build. The server's cache headers were left alone — adding `ETag` /
 `Last-Modified` to `server.js` would let the browser revalidate instead of re-download,
 but that is a server change and out of scope for this step.
+
+
+## Public demo smoke audit — 2026-11-26
+
+A read-only browser audit loaded the following live pages successfully:
+
+- https://hotel-easy-pass.onrender.com/
+- https://hotel-easy-pass.onrender.com/owner.html
+- https://hotel-easy-pass.onrender.com/dashboard.html
+- https://hotel-easy-pass.onrender.com/traveler.html
+
+The traveler entry accepted a fictional demo nickname and continued to the traveler flow. The owner workspace and analytics dashboard rendered. The dashboard showed zero recorded events, zero app opens, zero traveler actions, and zero partner clicks after the traveler demo. No browser console, uncaught runtime, or unhandled promise errors were observed.
+
+The audit did not sign in, configure billing, create real bookings, submit payments, or persist owner data. It therefore verifies page reachability and the limited public demo flow, not complete production operations.
+
+## Latest CI evidence — 2026-11-26
+
+- GitHub Actions test workflow [45825124242](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124242): passed.
+- Validation workflow [45825124395](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124395): passed.
+- Sale-package workflow [45825124202](https://github.com/bennett2oakley-hue/hotel-easy-pass/actions/runs/45825124202): passed.
+
+## Remaining release limitations
+
+The public browser audit did not verify live Supabase account creation, database persistence, Stripe checkout, webhook fulfillment, refunds, disputes, or real owner-side cloud writes. The prior sandbox QA found billing configuration absent there. The buyer must configure their own Supabase and Stripe credentials and run provider test-mode acceptance before enabling paid access. Treat Hotel Easy Pass as a working client-side PWA and early-stage software asset, not a fully integrated hotel booking or payments platform.
