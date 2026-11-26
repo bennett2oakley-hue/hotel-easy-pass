@@ -60,3 +60,59 @@ test("an account with an active lifetime entitlement cannot start another checko
   assert.equal(JSON.parse(result.body).ok, false);
   assert.equal(stripeCheckoutCalls, 0);
 });
+
+
+test("repeated unlock requests in the same five-minute window reuse Stripe idempotency key", async (t) => {
+  const envKeys = ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "SUPABASE_URL", "SUPABASE_ANON_KEY", "SUPABASE_SERVICE_ROLE_KEY", "STRIPE_PRICE_UNLOCK"];
+  const previousEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
+  const originalFetch = global.fetch;
+  const originalNow = Date.now;
+  t.after(() => {
+    for (const key of envKeys) {
+      if (previousEnv[key] === undefined) delete process.env[key];
+      else process.env[key] = previousEnv[key];
+    }
+    global.fetch = originalFetch;
+    Date.now = originalNow;
+  });
+
+  Object.assign(process.env, {
+    STRIPE_SECRET_KEY: "sk_test_fixture",
+    STRIPE_WEBHOOK_SECRET: "whsec_test_fixture",
+    SUPABASE_URL: "https://example.supabase.co",
+    SUPABASE_ANON_KEY: "anon_fixture",
+    SUPABASE_SERVICE_ROLE_KEY: "service_fixture",
+    STRIPE_PRICE_UNLOCK: "price_fixture"
+  });
+  Date.now = () => 1795363200000;
+
+  const idempotencyKeys = [];
+  global.fetch = async (url, options = {}) => {
+    if (String(url).endsWith("/auth/v1/user")) {
+      return new Response(JSON.stringify({
+        id: "123e4567-e89b-42d3-a456-426614174000",
+        email: "buyer@example.com"
+      }), { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    if (String(url).includes("/rest/v1/app_entitlements?")) {
+      return new Response("[]", { status: 200, headers: { "Content-Type": "application/json" } });
+    }
+    if (String(url).includes("api.stripe.com/v1/checkout/sessions")) {
+      idempotencyKeys.push(options.headers["Idempotency-Key"]);
+      return new Response(JSON.stringify({ url: "https://checkout.stripe.test/session" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    throw new Error("Unexpected request: " + url);
+  };
+
+  const request = { headers: { authorization: "Bearer user-token" } };
+  const first = await createCheckout(request);
+  const second = await createCheckout(request);
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.equal(idempotencyKeys.length, 2);
+  assert.ok(idempotencyKeys[0]);
+  assert.equal(idempotencyKeys[0], idempotencyKeys[1]);
+});
